@@ -1,0 +1,3382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoCotação Brasil — Sistema de Cotação de Autopeças</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0a0d12;
+  --panel:rgba(23,29,38,.55);
+  --panel-2:rgba(28,35,46,.55);
+  --panel-3:rgba(33,42,55,.6);
+  --glass-border:rgba(255,255,255,.14);
+  --glass-highlight:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.10);
+  --border-2:rgba(255,255,255,.18);
+  --text:#f2f5f9;
+  --muted:#aab3c0;
+  --accent:#ef8b2c;
+  --accent-dim:rgba(239,139,44,.18);
+  --accent-strong:#ffa348;
+  --good:#4ade80;
+  --good-dim:rgba(74,222,128,.15);
+  --bad:#f87171;
+  --bad-dim:rgba(248,113,113,.15);
+  --blue:#5fb3f0;
+  --blur:18px;
+}
+
+*{box-sizing:border-box}
+
+html,body{height:100%}
+
+body{
+  margin:0;
+  font-family:'Inter',Arial,sans-serif;
+  background-color:var(--ink);
+  background-image:
+    linear-gradient(180deg, rgba(8,10,14,.86), rgba(8,10,14,.93)),
+    radial-gradient(1100px 600px at 100% -10%, rgba(239,139,44,.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(95,179,240,.08), transparent 60%),
+    url('https://images.unsplash.com/photo-1586040661238-69c4c4a46b55?auto=format&fit=crop&w=1920&q=70');
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+  color:var(--text);
+  min-height:100vh;
+}
+
+h1,h2,h3,.logo,.nav button,.preview-title{
+  font-family:'Barlow Condensed',Arial,sans-serif;
+}
+
+.app{display:flex;min-height:100vh}
+
+/* ---------- SIDEBAR ---------- */
+
+.sidebar{
+  width:236px;
+  flex-shrink:0;
+  background:linear-gradient(180deg, rgba(23,29,38,.5), rgba(10,13,18,.65));
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  border-right:1px solid var(--glass-border);
+  padding:24px 18px;
+  display:flex;
+  flex-direction:column;
+}
+
+.logo{
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:.01em;
+  margin-bottom:4px;
+  display:flex;
+  align-items:baseline;
+  gap:2px;
+}
+
+.logo span{color:var(--accent)}
+
+.logo-tag{
+  color:var(--muted);
+  font-size:12px;
+  font-family:'Inter',Arial,sans-serif;
+  margin-bottom:26px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+
+.nav{display:flex;flex-direction:column;gap:3px}
+
+.nav button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  text-align:left;
+  background:transparent;
+  color:var(--muted);
+  border:0;
+  border-left:2px solid transparent;
+  padding:11px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:.01em;
+  transition:background .15s,color .15s,border-color .15s;
+}
+
+.nav button .ico{
+  width:18px;
+  text-align:center;
+  font-family:'Inter',Arial,sans-serif;
+  font-size:12px;
+  font-weight:700;
+  color:var(--muted);
+  border:1px solid var(--border-2);
+  border-radius:4px;
+  padding:3px 0;
+}
+
+.nav button:hover{background:var(--panel-2);color:var(--text)}
+
+.nav button.active{
+  background:var(--accent-dim);
+  color:#fff;
+  border-left-color:var(--accent);
+}
+
+.nav button.active .ico{
+  border-color:var(--accent);
+  color:var(--accent-strong);
+}
+
+.sidebar-foot{
+  margin-top:auto;
+  padding-top:16px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+}
+
+/* ---------- MAIN ---------- */
+
+main{
+  flex:1;
+  padding:30px 34px 60px;
+  overflow:auto;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  margin-bottom:24px;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+h1{margin:0;font-size:32px;font-weight:700;letter-spacing:.01em}
+h2{margin:0 0 4px;font-size:21px;font-weight:600}
+h3{margin-top:0;font-size:17px;font-weight:600}
+
+.subtitle{color:var(--muted);margin-top:5px;font-size:14px}
+
+.card{
+  background:var(--panel);
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  border:1px solid var(--glass-border);
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:18px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25), inset 0 1px 0 var(--glass-highlight);
+}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px;font-weight:500}
+
+input,select,textarea{
+  width:100%;
+  padding:11px 12px;
+  border-radius:9px;
+  border:1px solid var(--border-2);
+  background:rgba(10,13,18,.45);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  color:#fff;
+  outline:none;
+  font-family:'Inter',Arial,sans-serif;
+  font-size:14px;
+}
+
+input::placeholder{color:#8a94a3}
+
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+
+button{font-family:'Inter',Arial,sans-serif}
+
+button.primary{
+  background:var(--accent);
+  color:#1a1005;
+  border:0;
+  padding:11px 18px;
+  border-radius:9px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:14px;
+  white-space:nowrap;
+  box-shadow:0 4px 14px rgba(239,139,44,.28);
+}
+
+button.primary:hover{background:var(--accent-strong)}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+
+.btn{
+  background:rgba(33,42,55,.5);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  color:var(--text);
+  border:1px solid var(--border-2);
+  padding:11px 18px;
+  border-radius:9px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+.btn:hover{background:rgba(42,52,65,.65)}
+
+.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+
+table{width:100%;border-collapse:collapse;margin-top:8px}
+
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+
+th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+
+.badge{padding:4px 9px;border-radius:999px;background:var(--good-dim);color:var(--good);font-size:12px;font-weight:600}
+.badge-blue{padding:4px 9px;border-radius:999px;background:rgba(95,179,240,.14);color:var(--blue);font-size:12px;font-weight:600}
+.badge-muted{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:12px;font-weight:600}
+
+.danger{
+  background:transparent;
+  color:var(--bad);
+  border:1px solid rgba(248,113,113,.35);
+  border-radius:8px;
+  padding:7px 12px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+}
+.danger:hover{background:var(--bad-dim)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+.stat strong{display:block;font-size:30px;margin-top:6px;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:700}
+
+.hidden{display:none !important}
+
+.muted{color:var(--muted);font-size:13px}
+
+.section-title{margin-top:0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+.category-badge{display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(148,163,184,.12);color:#cbd5e1;font-size:11px;font-weight:600}
+
+/* flow strip on dashboard */
+.flow{display:flex;flex-wrap:wrap;gap:0;counter-reset:step}
+.flow-step{
+  flex:1;min-width:150px;
+  display:flex;gap:10px;align-items:flex-start;
+  padding:14px 14px 14px 0;
+  position:relative;
+}
+.flow-step .n{
+  counter-increment:step;
+  flex-shrink:0;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--accent-dim);color:var(--accent-strong);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',Arial,sans-serif;font-weight:700;font-size:14px;
+}
+.flow-step .n::before{content:counter(step)}
+.flow-step p{margin:0;font-size:13.5px;color:var(--text);line-height:1.4}
+.flow-step small{color:var(--muted);display:block;margin-top:2px;font-size:12px}
+
+/* preview box (client) */
+
+.preview-box{
+  background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  border:1px solid rgba(239,139,44,.22);
+  border-radius:16px;
+  padding:24px;
+}
+
+.preview-head{
+  display:flex;justify-content:space-between;align-items:center;gap:15px;
+  border-bottom:1px solid var(--border);padding-bottom:18px;margin-bottom:18px;
+}
+
+.preview-title{font-size:26px;font-weight:700}
+.preview-sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+.preview-vehicle{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.preview-info{padding:12px;border-radius:10px;background:var(--ink);border:1px solid var(--border)}
+.preview-info small{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}
+.preview-info strong{font-size:14px}
+
+.preview-items{width:100%;border-collapse:collapse}
+.preview-items th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px;border-bottom:1px solid var(--border)}
+.preview-items td{padding:13px 10px;border-bottom:1px solid var(--border)}
+
+.preview-total{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:18px;font-size:22px;font-weight:700}
+.preview-total small{font-size:12px;color:var(--muted);font-weight:500}
+
+.best-badge{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:999px;background:var(--good-dim);color:var(--good);font-size:11px;font-weight:700}
+
+.forn-compare-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;
+}
+.forn-compare-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.forn-total{font-size:20px;font-weight:700;font-family:'Barlow Condensed',Arial,sans-serif}
+.price-input{max-width:130px}
+
+/* progresso de respostas por item (percentual) */
+.item-progress-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:14px;
+}
+.item-progress{
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  text-align:center;
+}
+.item-progress-pct{
+  font-family:'Barlow Condensed',Arial,sans-serif;
+  font-size:26px;
+  font-weight:700;
+  line-height:1;
+  margin-bottom:6px;
+}
+.item-progress-label{
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:8px;
+  min-height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.item-progress-bar{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+  margin-bottom:6px;
+}
+.item-progress-fill{height:100%;border-radius:999px}
+.item-progress-sub{font-size:11px}
+
+.empty{text-align:center;color:var(--muted);padding:34px;font-size:14px}
+
+.status-line{margin-top:10px;font-size:13px;color:var(--good);min-height:18px}
+
+.brand-tags{display:flex;flex-wrap:wrap;gap:6px}
+.brand-tag{display:inline-block;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border-2);color:var(--text);font-size:11.5px;font-weight:500}
+
+/* ---------- MODAL DE HISTÓRICO (visualização somente leitura) ---------- */
+
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(5,7,10,.72);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;padding:20px;
+}
+.modal-overlay.hidden{display:none !important}
+.modal-box{
+  background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  border:1px solid var(--glass-border);
+  border-radius:16px;
+  padding:26px;
+  max-width:840px;width:100%;max-height:88vh;overflow:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.modal-box table{font-size:13.5px}
+.historico-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- ACESSIBILIDADE / FOCO ---------- */
+
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent-strong);
+  outline-offset:2px;
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+}
+
+/* ---------- TOPO / BARRA SUPERIOR ---------- */
+
+.topbar{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;
+  background:linear-gradient(180deg, rgba(20,25,33,.55), rgba(10,13,18,.5));
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  border-bottom:1px solid var(--glass-border);
+  position:sticky;top:0;z-index:60;
+}
+
+.hamburger{
+  display:none;
+  background:transparent;border:1px solid var(--border-2);color:var(--text);
+  width:38px;height:38px;border-radius:9px;cursor:pointer;font-size:16px;
+  flex-shrink:0;align-items:center;justify-content:center;
+}
+
+.topbar-search{position:relative;flex:1;max-width:440px}
+.topbar-search input{
+  padding-left:34px;background:rgba(10,13,18,.55);
+}
+.topbar-search .icn{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:13px;pointer-events:none;
+}
+.topbar-search-results{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  border:1px solid var(--glass-border);
+  border-radius:12px;
+  box-shadow:0 16px 40px rgba(0,0,0,.45);
+  max-height:360px;overflow:auto;
+  z-index:70;
+  display:none;
+}
+.topbar-search-results.show{display:block}
+.tsr-group-label{
+  padding:8px 14px 4px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--muted);font-weight:700;
+}
+.tsr-item{
+  display:block;width:100%;text-align:left;background:transparent;border:0;
+  color:var(--text);padding:9px 14px;cursor:pointer;font-size:13.5px;font-family:'Inter',Arial,sans-serif;
+}
+.tsr-item:hover,.tsr-item:focus-visible{background:var(--panel-3)}
+.tsr-item small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.tsr-empty{padding:16px;text-align:center;color:var(--muted);font-size:13px}
+
+.topbar-right{display:flex;align-items:center;gap:14px;margin-left:auto;flex-shrink:0}
+.autosave-indicator{
+  font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.autosave-indicator .dot{
+  width:7px;height:7px;border-radius:50%;background:var(--good);
+  box-shadow:0 0 0 3px var(--good-dim);flex-shrink:0;
+}
+
+/* ---------- NAV: agrupamento por seção ---------- */
+
+.nav-section-label{
+  font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+  font-weight:700;font-family:'Inter',Arial,sans-serif;
+  margin:16px 0 4px;padding:0 12px;
+}
+.nav-section-label:first-child{margin-top:0}
+
+/* ---------- TOASTS ---------- */
+
+#toastContainer{
+  position:fixed;bottom:22px;right:22px;z-index:2000;
+  display:flex;flex-direction:column;gap:10px;
+  max-width:min(360px,calc(100vw - 32px));
+}
+.toast{
+  display:flex;align-items:flex-start;gap:10px;
+  background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  border:1px solid var(--glass-border);
+  border-left:3px solid var(--blue);
+  border-radius:12px;
+  padding:13px 15px;
+  box-shadow:0 12px 32px rgba(0,0,0,.4);
+  font-size:13.5px;
+  animation:toastIn .18s ease-out;
+}
+.toast.sucesso{border-left-color:var(--good)}
+.toast.erro{border-left-color:var(--bad)}
+.toast .toast-ico{flex-shrink:0;font-weight:700;margin-top:1px}
+.toast.sucesso .toast-ico{color:var(--good)}
+.toast.erro .toast-ico{color:var(--bad)}
+.toast.info .toast-ico{color:var(--blue)}
+.toast-close{
+  margin-left:auto;background:transparent;border:0;color:var(--muted);cursor:pointer;
+  font-size:15px;padding:0 0 0 8px;line-height:1;
+}
+.toast-undo{
+  margin-left:auto;background:transparent;border:0;color:var(--accent-strong);cursor:pointer;
+  font-size:12.5px;font-weight:700;padding:0 0 0 8px;white-space:nowrap;
+}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- MODAL DE CONFIRMAÇÃO ---------- */
+
+#modalConfirmacao .modal-box{max-width:420px;padding:24px}
+#modalConfirmacao h3{margin:0 0 8px;font-size:19px}
+#modalConfirmacao p{margin:0 0 20px;color:var(--muted);font-size:13.5px;line-height:1.5}
+#modalConfirmacao .modal-actions{display:flex;justify-content:flex-end;gap:10px}
+
+/* ---------- CAMPOS COM ERRO DE VALIDAÇÃO ---------- */
+
+.campo-erro{border-color:var(--bad) !important;box-shadow:0 0 0 3px var(--bad-dim) !important}
+.campo-msg-erro{color:var(--bad);font-size:11.5px;margin-top:5px;display:block}
+
+/* ---------- BACKUP ---------- */
+
+.backup-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.backup-info{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.backup-info .card{margin-bottom:0}
+input[type="file"]{padding:8px}
+
+@media(max-width:1100px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr 1fr}
+  .backup-info{grid-template-columns:1fr 1fr}
+  .topbar-search{max-width:280px}
+}
+
+@media(max-width:900px){
+  .sidebar{width:230px}
+}
+
+@media(max-width:650px){
+  .hamburger{display:flex}
+  .topbar-search{order:3;max-width:none;width:100%;flex-basis:100%}
+  .topbar{flex-wrap:wrap;padding:10px 14px}
+  .autosave-indicator span.autosave-text{display:none}
+
+  .app{display:block}
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:250px;z-index:200;
+    transform:translateX(-105%);transition:transform .22s ease;
+    box-shadow:0 0 60px rgba(0,0,0,.6);
+  }
+  body.sidebar-open .sidebar{transform:translateX(0)}
+  body.sidebar-open::after{
+    content:"";position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;
+  }
+  .logo-tag{display:block}
+  .nav{flex-direction:column;flex-wrap:nowrap}
+  main{padding:16px}
+  .grid,.stats,.backup-info{grid-template-columns:1fr}
+  .row{display:block}
+  .row>*{display:block;margin-bottom:10px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  .preview-vehicle{grid-template-columns:1fr}
+}
+
+@media(min-width:651px){
+  .hamburger{display:none !important}
+}
+
+/* ---------- IMPRESSÃO / PDF ---------- */
+
+.print-only{display:none}
+
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{
+    display:block !important;
+    position:absolute;
+    left:0;top:0;
+    width:100%;
+    padding:20px;
+    color:#000;
+    background:#fff;
+  }
+  #printArea .preview-box{border:0;background:#fff;padding:0}
+  #printArea .preview-title,#printArea h1,#printArea h2,#printArea h3{color:#000}
+  #printArea table td,#printArea table th{color:#000;border-bottom:1px solid #999}
+  #printArea .muted{color:#555}
+  #printArea .preview-head .badge{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+  <div class="logo">Auto<span>Cotação</span></div>
+  <div class="logo-tag">Cotação de autopeças e serviços de retífica</div>
+
+  <div class="nav">
+    <div class="nav-section-label">Principal</div>
+    <button data-page="dashboard" class="active" onclick="showPage('dashboard',this);fecharSidebarMobile()"><span class="ico">▤</span> Dashboard</button>
+
+    <div class="nav-section-label">Cadastros</div>
+    <button data-page="pecas" onclick="showPage('pecas',this);fecharSidebarMobile()"><span class="ico">⚙</span> Catálogo de Peças</button>
+    <button data-page="fornecedores" onclick="showPage('fornecedores',this);fecharSidebarMobile()"><span class="ico">⌂</span> Fornecedores</button>
+
+    <div class="nav-section-label">Cotação</div>
+    <button data-page="cotacao" onclick="showPage('cotacao',this);fecharSidebarMobile()"><span class="ico">＋</span> Nova Cotação</button>
+    <button data-page="comparar" onclick="showPage('comparar',this);fecharSidebarMobile()"><span class="ico">≡</span> Comparar Itens</button>
+
+    <div class="nav-section-label">Registros</div>
+    <button data-page="historico" onclick="showPage('historico',this);fecharSidebarMobile()"><span class="ico">▣</span> Histórico</button>
+    <button data-page="backup" onclick="showPage('backup',this);fecharSidebarMobile()"><span class="ico">⇅</span> Backup e Dados</button>
+  </div>
+
+  <div class="sidebar-foot">AutoCotação Brasil — v2.0<br>Dados salvos automaticamente neste navegador.</div>
+</aside>
+
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+
+<div class="topbar">
+  <button class="hamburger" onclick="toggleSidebarMobile()" aria-label="Abrir menu" title="Abrir menu">☰</button>
+  <div class="topbar-search">
+    <span class="icn">🔎</span>
+    <input id="buscaGlobal" placeholder="Pesquisar peças, fornecedores, orçamentos... (Ctrl+K)"
+      autocomplete="off"
+      oninput="pesquisaGlobalDebounced(this.value)"
+      onfocus="if(this.value.trim())pesquisaGlobal(this.value)"
+      onkeydown="if(event.key==='Escape'){this.blur();fecharResultadosBusca()}">
+    <div id="topbarSearchResults" class="topbar-search-results"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="autosave-indicator"><span class="dot"></span><span class="autosave-text" id="autoSaveIndicator">Tudo salvo</span></div>
+  </div>
+</div>
+
+<main>
+
+<!-- DASHBOARD -->
+<section id="dashboard">
+
+<div class="top">
+  <div>
+    <h1>Dashboard</h1>
+    <div class="subtitle">Sistema de cotação de autopeças do Brasil</div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="card stat"><label>Peças cadastradas</label><strong id="statPecas">0</strong></div>
+  <div class="card stat"><label>Serviços de retífica</label><strong id="statServicos">0</strong></div>
+  <div class="card stat"><label>Itens na cotação</label><strong id="statCotacao">0</strong></div>
+  <div class="card stat"><label>Fornecedores selecionados</label><strong id="statForn">0</strong></div>
+</div>
+
+<div class="card">
+  <h2>Fluxo da cotação</h2>
+  <div class="flow">
+    <div class="flow-step"><span class="n"></span><p>Encontre a peça ou serviço<small>Catálogo de Peças</small></p></div>
+    <div class="flow-step"><span class="n"></span><p>Escolha a marca e a quantidade<small>Nova Cotação</small></p></div>
+    <div class="flow-step"><span class="n"></span><p>Adicione o veículo e finalize<small>Nova Cotação</small></p></div>
+    <div class="flow-step"><span class="n"></span><p>Selecione os fornecedores<small>Fornecedores</small></p></div>
+    <div class="flow-step"><span class="n"></span><p>Informe os preços recebidos<small>Comparar Itens</small></p></div>
+    <div class="flow-step"><span class="n"></span><p>Compare e monte o orçamento<small>Comparar Itens</small></p></div>
+    <div class="flow-step"><span class="n"></span><p>Envie o orçamento ao cliente<small>Comparar Itens</small></p></div>
+  </div>
+</div>
+
+<div class="card" id="dashResumoWrap">
+  <h2>Cotação atual</h2>
+  <div id="dashResumo" class="subtitle">Nenhum item na cotação ainda.</div>
+</div>
+
+</section>
+
+
+<!-- CATÁLOGO -->
+<section id="pecas" class="hidden">
+
+<div class="top">
+  <div>
+    <h1>Catálogo de Peças</h1>
+    <div class="subtitle">Peças comercializadas no mercado brasileiro</div>
+  </div>
+  <button class="primary" id="btnAbrirCadastroPeca" onclick="toggleCadastroPeca()">+ Cadastrar Peça / Marca</button>
+</div>
+
+<div class="card hidden" id="cardCadastroPeca">
+  <h2>Cadastrar nova peça ou marca</h2>
+  <p class="subtitle">Preencha o nome da peça e, se quiser, categoria, marcas e posição — novas ou já existentes. Escrever uma categoria/marca que ainda não existe já a cadastra automaticamente. Para mais de uma marca, separe por vírgula.</p>
+  <div class="grid">
+    <div>
+      <label>Peça *</label>
+      <input id="novaPecaNome" list="pecasNomesList" placeholder="Ex.: Coxim do câmbio">
+    </div>
+    <div>
+      <label>Categoria</label>
+      <input id="novaPecaCategoria" list="categoriasList" placeholder="Ex.: Suspensão">
+    </div>
+    <div>
+      <label>Marca(s)</label>
+      <input id="novaPecaMarca" list="marcasListCadastro" placeholder="Ex.: Mahle, Cofap, Takao">
+    </div>
+    <div>
+      <label>Posição</label>
+      <input id="novaPecaPosicao" list="posicoesList" placeholder="Ex.: Dianteira">
+    </div>
+  </div>
+  <datalist id="categoriasList"></datalist>
+  <datalist id="marcasListCadastro"></datalist>
+  <datalist id="posicoesList"></datalist>
+  <datalist id="pecasNomesList"></datalist>
+  <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap">
+    <span id="cadastroPecaStatus" class="subtitle"></span>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="toggleCadastroPeca()">Cancelar</button>
+      <button class="primary" onclick="cadastrarNovaPeca()">Salvar peça</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="row">
+    <div>
+      <label>Pesquisar peça</label>
+      <input id="busca" placeholder="Ex.: pistão, pivô, amortecedor..." oninput="renderPecas()">
+    </div>
+    <div>
+      <label>Categoria</label>
+      <select id="filtroCategoria" onchange="renderPecas()"><option value="">Todas as categorias</option></select>
+    </div>
+    <div>
+      <label>Marca</label>
+      <select id="filtroMarca" onchange="renderPecas()"><option value="">Todas as marcas</option></select>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+    <span id="selecaoStatus" class="subtitle">Marque as peças que deseja cotar e adicione todas de uma vez.</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="limparSelecaoPecas()">Limpar seleção</button>
+      <button class="primary" id="btnAddSelecionadas" onclick="adicionarSelecionadasACotacao()" disabled>Adicionar Peças Selecionadas à Nova Cotação</button>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th style="width:36px"></th><th>Peça</th><th>Categoria</th><th>Marcas compatíveis</th><th>Posição</th><th></th></tr></thead>
+    <tbody id="pecasBody"></tbody>
+  </table>
+</div>
+
+</section>
+
+
+<!-- NOVA COTAÇÃO -->
+<section id="cotacao" class="hidden">
+
+<div class="top">
+  <div>
+    <h1>Nova Cotação</h1>
+    <div class="subtitle">Selecione as peças que deseja cotar com os fornecedores. Os serviços são adicionados depois, na tela "Comparar Itens".</div>
+  </div>
+</div>
+
+<div id="edicaoHistoricoBanner" class="card hidden" style="border-color:var(--accent);background:var(--accent-dim)">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <span></span>
+    <button class="btn" onclick="cancelarEdicaoHistorico()">Cancelar edição</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Adicionar peça</h2>
+  <div class="row">
+    <div>
+      <label>Peça</label>
+      <input id="pecaInput" list="pecasList" placeholder="Digite a peça" oninput="atualizarMarcasDoPecaInput()"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarCotacao()}">
+    </div>
+    <div>
+      <label>Marca</label>
+      <select id="marcaInput"><option value="">Sem marca definida</option></select>
+    </div>
+    <div>
+      <label>Quantidade</label>
+      <input id="qtdInput" type="number" min="1" value="1">
+    </div>
+    <div>
+      <label>Localização</label>
+      <select id="localizacaoInput">
+        <option value="">Não especificada</option>
+        <option value="Dianteira Esquerda">Dianteira Esquerda</option>
+        <option value="Dianteira Direita">Dianteira Direita</option>
+        <option value="Traseira Direita">Traseira Direita</option>
+        <option value="Traseira Esquerda">Traseira Esquerda</option>
+        <option value="Esquerda">Esquerda</option>
+        <option value="Direita">Direita</option>
+        <option value="Ambas">Ambas</option>
+      </select>
+    </div>
+    <button class="primary" onclick="adicionarCotacao()">+ Adicionar peça</button>
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap">
+    <span id="addStatus" class="subtitle">Você pode adicionar quantas peças precisar.</span>
+    <button class="btn" onclick="novaLinhaCotacao()">+ Adicionar outra peça</button>
+  </div>
+  <datalist id="pecasList"></datalist>
+</div>
+
+<datalist id="servicosList"></datalist>
+
+<div class="card">
+  <h2>Dados do veículo</h2>
+  <p class="subtitle">Esses dados serão incluídos automaticamente na cotação enviada ao fornecedor.</p>
+
+  <div class="grid">
+    <div><label>Marca do veículo</label><input id="carroMarca" placeholder="Ex.: Volkswagen" onchange="salvarDadosCarro()"></div>
+    <div><label>Modelo</label><input id="carroModelo" placeholder="Ex.: Gol" onchange="salvarDadosCarro()"></div>
+    <div><label>Ano</label><input id="carroAno" placeholder="Ex.: 2020" onchange="salvarDadosCarro()"></div>
+    <div><label>Motorização</label><input id="carroMotor" placeholder="Ex.: 1.6" onchange="salvarDadosCarro()"></div>
+    <div><label>Placa</label><input id="carroPlaca" placeholder="Opcional" onchange="salvarDadosCarro()"></div>
+    <div><label>Quilometragem</label><input id="carroKm" placeholder="Opcional" onchange="salvarDadosCarro()"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Itens para cotar</h2>
+  <div id="resumoItensCotacao"></div>
+  <table>
+    <thead><tr><th>Tipo</th><th>Item</th><th>Marca</th><th>Localização</th><th>Qtd.</th><th>Valor</th><th></th></tr></thead>
+    <tbody id="cotacaoBody"></tbody>
+  </table>
+
+  <div style="display:flex;justify-content:flex-end;margin-top:18px">
+    <button class="primary" onclick="finalizarCotacao()">Finalizar Cotação para Fornecedor</button>
+  </div>
+</div>
+
+<div id="finalCotacao" class="card hidden">
+  <h2>Cotação pronta para enviar</h2>
+  <p class="subtitle">Revise a mensagem e copie para enviar aos fornecedores.</p>
+  <textarea id="textoCotacao" style="width:100%;min-height:260px;resize:vertical"></textarea>
+
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
+    <button class="primary" onclick="copiarCotacao()">Copiar Cotação</button>
+    <button class="primary" onclick="showPage('fornecedores',document.querySelectorAll('.nav button')[3])">Escolher Fornecedores</button>
+  </div>
+  <div id="copyStatus" class="status-line"></div>
+</div>
+
+</section>
+
+
+<!-- FORNECEDORES -->
+<section id="fornecedores" class="hidden">
+
+<div class="top">
+  <div>
+    <h1>Fornecedores</h1>
+    <div class="subtitle">Cadastre, exclua e selecione os fornecedores</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Novo fornecedor</h2>
+  <div class="row">
+    <div>
+      <label>Nome do fornecedor</label>
+      <input id="novoFornecedor" placeholder="Ex.: Auto Peças Brasil"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarFornecedor()}">
+    </div>
+    <button class="primary" onclick="adicionarFornecedor()">+ Adicionar fornecedor</button>
+  </div>
+  <div id="fornecedorStatus" class="status-line"></div>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Selecionar</th><th>Fornecedor</th><th>Região</th><th>Status</th><th>Ação</th></tr></thead>
+    <tbody id="fornBody"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <span id="enviarStatus" class="subtitle">Selecione ao menos um fornecedor e finalize uma cotação para enviar.</span>
+    <button class="primary" onclick="enviarCotacao()">Enviar cotação aos selecionados</button>
+  </div>
+</div>
+
+</section>
+
+
+<!-- COMPARAÇÃO -->
+<section id="comparar" class="hidden">
+
+<div class="top">
+  <div>
+    <h1>Comparar Itens do Orçamento</h1>
+    <div class="subtitle">Cada fornecedor aparece separado com suas respectivas peças cotadas. Os serviços do orçamento final são adicionados abaixo.</div>
+  </div>
+</div>
+
+<div class="card" id="cabecalhoOrcamentoAtual">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div><label>Número do orçamento</label><strong id="numeroOrcamentoAtualView" style="font-size:24px">#1000</strong></div>
+    <div style="text-align:right"><label>Data</label><strong id="dataOrcamentoAtualView">--/--/----</strong></div>
+  </div>
+</div>
+
+<div id="fornecedorCotacoes"></div>
+
+<div id="acrescimoCotacoes"></div>
+
+<div class="card">
+  <h2>Serviços do orçamento final</h2>
+  <p class="subtitle">Serviços são adicionados depois de cotar as peças com os fornecedores e não passam por cotação — informe diretamente o valor a cobrar do cliente.</p>
+  <div class="row">
+    <div>
+      <label>Serviço</label>
+      <input id="servicoFinalInput" list="servicosList" placeholder="Ex.: Alinhamento"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarServicoFinal()}">
+    </div>
+    <div>
+      <label>Quantidade</label>
+      <input id="qtdServicoFinalInput" type="number" min="1" value="1">
+    </div>
+    <div>
+      <label>Valor (R$)</label>
+      <input id="valorServicoFinalInput" type="number" min="0" step="0.01" placeholder="Ex.: 80,00"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarServicoFinal()}">
+    </div>
+    <button class="primary" onclick="adicionarServicoFinal()">+ Adicionar serviço</button>
+  </div>
+  <div id="servicoFinalStatus" class="status-line"></div>
+
+  <table>
+    <thead><tr><th>Serviço</th><th>Qtd.</th><th>Valor unit.</th><th>Subtotal</th><th></th></tr></thead>
+    <tbody id="servicosFinaisBody"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Enviar orçamento ao cliente</h2>
+  <p class="subtitle">Depois de preencher os preços, escolha quais itens deseja enviar. O sistema seleciona automaticamente o menor preço disponível de cada item.</p>
+
+  <div class="row">
+    <div><label>Nome do cliente</label><input id="clienteNome" placeholder="Nome do cliente"></div>
+    <div><label>WhatsApp do cliente (opcional)</label><input id="clienteWhatsapp" placeholder="Ex.: 47999998888"></div>
+    <div><label>Observação</label><input id="clienteObs" placeholder="Observação opcional"></div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;margin-top:14px">
+    <button class="primary" onclick="prepararEnvioCliente()">Ver prévia para o cliente</button>
+  </div>
+</div>
+
+<div id="previewCliente" class="card hidden">
+  <div class="preview-box">
+    <div class="preview-head">
+      <div>
+        <div class="preview-title" id="previewTituloOrcamento">Prévia do orçamento</div>
+        <div class="preview-sub" id="previewSubOrcamento">Esta é a informação comercial que será apresentada ao cliente.</div>
+      </div>
+      <span class="badge">PRONTO PARA ENVIO</span>
+    </div>
+
+    <div id="previewVisual"></div>
+
+    <textarea id="textoCliente" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"></textarea>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap">
+      <button class="primary" onclick="copiarOrcamentoCliente()">Copiar orçamento</button>
+      <button class="btn" onclick="enviarWhatsapp()">Enviar por WhatsApp</button>
+      <button class="btn" onclick="imprimirOrcamento()">Imprimir / Salvar PDF</button>
+      <button class="primary" onclick="salvarOrcamento()">Salvar Orçamento</button>
+      <button class="primary" onclick="confirmarEnvioCliente()">Confirmar envio</button>
+    </div>
+
+    <div id="clienteStatus" class="status-line"></div>
+  </div>
+</div>
+
+</section>
+
+<!-- HISTÓRICO -->
+<section id="historico" class="hidden">
+  <div class="top">
+    <div>
+      <h1>Histórico de Orçamentos</h1>
+      <div class="subtitle">Orçamentos salvos anteriormente. Cada registro é uma cópia independente e não é alterado quando um novo orçamento é criado.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2 style="margin:0">Orçamentos salvos</h2>
+      <button class="btn" onclick="renderHistorico()">Atualizar histórico</button>
+    </div>
+    <div id="historicoBody" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<!-- BACKUP E DADOS -->
+<section id="backup" class="hidden">
+  <div class="top">
+    <div>
+      <h1>Backup e Dados</h1>
+      <div class="subtitle">Todos os dados ficam salvos automaticamente neste navegador. Use o backup para levar seus dados para outro computador ou se precaver contra perda de dados.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Exportar backup</h2>
+    <p class="subtitle">Gera um arquivo .json com peças cadastradas, fornecedores, cotação atual e todo o histórico de orçamentos.</p>
+    <div class="backup-actions">
+      <button class="primary" onclick="exportarBackup()">⇩ Baixar backup completo</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Restaurar backup</h2>
+    <p class="subtitle">Selecione um arquivo .json exportado anteriormente. Isso substituirá os dados atuais salvos neste navegador — faça um backup antes, se necessário.</p>
+    <div class="backup-actions">
+      <input type="file" id="arquivoBackup" accept="application/json" style="max-width:340px">
+      <button class="primary" onclick="importarBackup()">⇧ Restaurar backup</button>
+    </div>
+    <div id="backupStatus" class="status-line"></div>
+  </div>
+
+  <div class="card">
+    <h2>Resumo dos dados salvos</h2>
+    <div class="backup-info" id="backupResumo"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="color:var(--bad)">Zona de risco</h2>
+    <p class="subtitle">Apaga permanentemente todos os dados salvos neste navegador (catálogo personalizado, fornecedores, cotação atual e histórico). Esta ação não pode ser desfeita — recomendamos exportar um backup antes.</p>
+    <div class="backup-actions">
+      <button class="danger" onclick="confirmarLimpezaTotal()">Apagar todos os dados</button>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+<div id="modalHistorico" class="modal-overlay hidden" onclick="if(event.target===this) fecharModalHistorico()">
+  <div class="modal-box" id="modalHistoricoBox"></div>
+</div>
+
+<div id="modalConfirmacao" class="modal-overlay hidden" onclick="if(event.target===this) fecharConfirmacao(false)">
+  <div class="modal-box">
+    <h3 id="confirmacaoTitulo">Confirmar ação</h3>
+    <p id="confirmacaoMensagem">Tem certeza?</p>
+    <div class="modal-actions">
+      <button class="btn" onclick="fecharConfirmacao(false)">Cancelar</button>
+      <button class="danger" id="confirmacaoBtnOk" style="border-color:var(--accent);color:var(--accent-strong)" onclick="fecharConfirmacao(true)">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer" aria-live="polite"></div>
+
+<div id="printArea" class="print-only"></div>
+
+<script>
+
+/* =========================================================
+   CATÁLOGO COMPLETO — estrutura por peça: [nome, categoria, marcas[], posicao]
+========================================================= */
+
+const catalogoBaseRaw = [
+["Pistão","Motor","Diversas","Motor"],
+["Jogo de anéis","Motor","Diversas","Motor"],
+["Biela","Motor","Diversas","Motor"],
+["Bronzina de biela","Motor","Diversas","Motor"],
+["Bronzina de mancal","Motor","Diversas","Motor"],
+["Virabrequim","Motor","Diversas","Motor"],
+["Comando de válvulas","Motor","Diversas","Motor"],
+["Tucho","Motor","Diversas","Motor"],
+["Válvula de admissão","Motor","Diversas","Motor"],
+["Válvula de escape","Motor","Diversas","Motor"],
+["Junta do cabeçote","Motor","Diversas","Motor"],
+["Jogo de juntas do motor","Motor","Diversas","Motor"],
+["Retentor do virabrequim","Motor","Diversas","Motor"],
+["Retentor de válvula","Motor","Diversas","Motor"],
+["Correia dentada","Motor","Gates","Motor"],
+["Kit correia dentada","Motor","Gates","Motor"],
+["Tensor da correia","Motor","Diversas","Motor"],
+["Correia de acessórios","Motor","Diversas","Motor"],
+["Bomba d'água","Motor","Urba","Motor"],
+["Coxim do motor","Motor","Diversas","Motor"],
+["Cabeçote completo","Cabeçote","Diversas","Motor"],
+["Guia de válvula","Cabeçote","Diversas","Motor"],
+["Sede de válvula","Cabeçote","Diversas","Motor"],
+["Tucho hidráulico","Cabeçote","Diversas","Motor"],
+["Balancim","Cabeçote","Diversas","Motor"],
+["Bico injetor","Injeção","Bosch","Motor"],
+["Bomba de combustível","Injeção","Bosch","Motor"],
+["Corpo de borboleta","Injeção","Diversas","Motor"],
+["Sensor MAP","Injeção","Bosch","Motor"],
+["Sensor MAF","Injeção","Bosch","Motor"],
+["Sensor de rotação","Injeção","Bosch","Motor"],
+["Sensor de fase","Injeção","Bosch","Motor"],
+["Sonda lambda","Injeção","Bosch","Motor"],
+["Sensor de temperatura","Injeção","Bosch","Motor"],
+["Sensor de pressão","Injeção","Bosch","Motor"],
+["Regulador de pressão","Injeção","Bosch","Motor"],
+["Vela de ignição","Ignição","NGK","Motor"],
+["Bobina de ignição","Ignição","Bosch","Motor"],
+["Cabo de vela","Ignição","NGK","Motor"],
+["Módulo de ignição","Ignição","Bosch","Motor"],
+["Radiador","Arrefecimento","Diversas","Motor"],
+["Válvula termostática","Arrefecimento","Diversas","Motor"],
+["Reservatório de expansão","Arrefecimento","Diversas","Motor"],
+["Tampa do reservatório","Arrefecimento","Diversas","Motor"],
+["Eletroventilador","Arrefecimento","Diversas","Motor"],
+["Mangueira do radiador","Arrefecimento","Diversas","Motor"],
+["Junta da bomba d'água","Arrefecimento","Diversas","Motor"],
+["Pastilha de freio","Freios","Fras-le","Dianteira"],
+["Disco de freio","Freios","Fremax","Dianteira"],
+["Tambor de freio","Freios","Fremax","Traseira"],
+["Lona de freio","Freios","Fras-le","Traseira"],
+["Cilindro mestre","Freios","TRW","Dianteira"],
+["Cilindro de roda","Freios","TRW","Traseira"],
+["Servo-freio","Freios","TRW","Dianteira"],
+["Pinça de freio","Freios","TRW","Dianteira"],
+["Kit reparo de pinça","Freios","TRW","Dianteira"],
+["Sensor ABS","Freios","Bosch","Dianteira"],
+["Fluido de freio","Freios","Diversas","Sistema"],
+["Amortecedor","Suspensão","Cofap","Dianteira"],
+["Amortecedor","Suspensão","Monroe","Traseira"],
+["Mola helicoidal","Suspensão","Cofap","Dianteira"],
+["Coxim do amortecedor","Suspensão","Nakata","Dianteira"],
+["Kit batente","Suspensão","Nakata","Dianteira"],
+["Pivô","Suspensão","Nakata","Dianteira"],
+["Pivô","Suspensão","TRW","Dianteira"],
+["Bandeja","Suspensão","Nakata","Dianteira"],
+["Bucha de bandeja","Suspensão","Axios","Dianteira"],
+["Bieleta","Suspensão","Nakata","Dianteira"],
+["Barra estabilizadora","Suspensão","Diversas","Dianteira"],
+["Bucha da barra estabilizadora","Suspensão","Axios","Dianteira"],
+["Terminal de direção","Direção","Nakata","Dianteira"],
+["Barra axial","Direção","Nakata","Dianteira"],
+["Caixa de direção","Direção","TRW","Dianteira"],
+["Bomba hidráulica","Direção","TRW","Motor"],
+["Coifa da direção","Direção","Nakata","Dianteira"],
+["Junta da coluna","Direção","Diversas","Direção"],
+["Kit embreagem","Transmissão","Sachs","Motor"],
+["Disco de embreagem","Transmissão","Sachs","Motor"],
+["Platô","Transmissão","Sachs","Motor"],
+["Rolamento de embreagem","Transmissão","Sachs","Motor"],
+["Volante do motor","Transmissão","Diversas","Motor"],
+["Cabo de embreagem","Transmissão","Diversas","Motor"],
+["Coxim do câmbio","Transmissão","Diversas","Motor"],
+["Junta homocinética","Transmissão","Nakata","Dianteira"],
+["Coifa homocinética","Transmissão","Nakata","Dianteira"],
+["Semieixo","Transmissão","Nakata","Dianteira"],
+["Alternador","Elétrica","Bosch","Motor"],
+["Motor de partida","Elétrica","Valeo","Motor"],
+["Bateria","Elétrica","Moura","Motor"],
+["Regulador de tensão","Elétrica","Bosch","Motor"],
+["Fusível","Elétrica","Diversas","Elétrica"],
+["Relé","Elétrica","Bosch","Elétrica"],
+["Sensor","Elétrica","Bosch","Elétrica"],
+["Chicote elétrico","Elétrica","Diversas","Elétrica"],
+["Interruptor","Elétrica","Diversas","Elétrica"],
+["Filtro de óleo","Filtros","Tecfil","Motor"],
+["Filtro de ar","Filtros","Wega","Motor"],
+["Filtro de combustível","Filtros","Tecfil","Motor"],
+["Filtro de cabine","Filtros","Wega","Cabine"],
+["Filtro de transmissão","Filtros","Diversas","Transmissão"],
+["Compressor","Ar-condicionado","Diversas","Ar-condicionado"],
+["Condensador","Ar-condicionado","Diversas","Ar-condicionado"],
+["Evaporador","Ar-condicionado","Diversas","Ar-condicionado"],
+["Radiador do ar-condicionado","Ar-condicionado","Diversas","Ar-condicionado"],
+["Filtro secador","Ar-condicionado","Diversas","Ar-condicionado"],
+["Válvula de expansão","Ar-condicionado","Diversas","Ar-condicionado"],
+["Ventilador interno","Ar-condicionado","Diversas","Interno"],
+["Farol","Iluminação","Diversas","Dianteira"],
+["Lanterna traseira","Iluminação","Diversas","Traseira"],
+["Lâmpada","Iluminação","Diversas","Iluminação"],
+["Lâmpada de freio","Iluminação","Diversas","Traseira"],
+["Lâmpada de seta","Iluminação","Diversas","Iluminação"],
+["Lâmpada de placa","Iluminação","Diversas","Traseira"],
+["Retrovisor","Carroceria","Diversas","Lateral"],
+["Máquina do vidro","Carroceria","Diversas","Porta"],
+["Fechadura","Carroceria","Diversas","Porta"],
+["Maçaneta","Carroceria","Diversas","Porta"],
+["Palheta do limpador","Carroceria","Diversas","Dianteira"],
+["Motor do limpador","Carroceria","Diversas","Dianteira"],
+["Braço do limpador","Carroceria","Diversas","Dianteira"],
+["Rolamento de roda","Rodas","SKF","Dianteira"],
+
+/* ---- Fluidos e Lubrificantes ---- */
+["Óleo de motor 5W-30 sintético","Fluidos e Lubrificantes","Lubrax","Motor"],
+["Óleo de motor 5W-30 sintético","Fluidos e Lubrificantes","Ipiranga","Motor"],
+["Óleo de motor 5W-30 sintético","Fluidos e Lubrificantes","Petronas","Motor"],
+["Óleo de motor 5W-30 sintético","Fluidos e Lubrificantes","Shell Helix","Motor"],
+["Óleo de motor 5W-30 sintético","Fluidos e Lubrificantes","Mobil","Motor"],
+["Óleo de motor 5W-40 sintético","Fluidos e Lubrificantes","Castrol","Motor"],
+["Óleo de motor 5W-40 sintético","Fluidos e Lubrificantes","Motul","Motor"],
+["Óleo de motor 5W-40 sintético","Fluidos e Lubrificantes","Total","Motor"],
+["Óleo de motor 10W-40 semissintético","Fluidos e Lubrificantes","Lubrax","Motor"],
+["Óleo de motor 10W-40 semissintético","Fluidos e Lubrificantes","Ipiranga","Motor"],
+["Óleo de motor 15W-40 mineral","Fluidos e Lubrificantes","Lubrax","Motor"],
+["Óleo de motor 15W-40 mineral","Fluidos e Lubrificantes","Havoline","Motor"],
+["Óleo de motor 20W-50 mineral","Fluidos e Lubrificantes","Lubrax","Motor"],
+["Óleo de motor 20W-50 mineral","Fluidos e Lubrificantes","Ipiranga","Motor"],
+["Óleo diesel 15W-40","Fluidos e Lubrificantes","Lubrax","Motor"],
+["Óleo diesel 15W-40","Fluidos e Lubrificantes","Petronas","Motor"],
+["Óleo de câmbio manual 75W-90","Fluidos e Lubrificantes","Lubrax","Câmbio"],
+["Óleo de câmbio manual 75W-90","Fluidos e Lubrificantes","Ipiranga","Câmbio"],
+["Óleo de câmbio automático ATF","Fluidos e Lubrificantes","Lubrax","Câmbio"],
+["Óleo de câmbio automático ATF","Fluidos e Lubrificantes","Mobil","Câmbio"],
+["Óleo de direção hidráulica","Fluidos e Lubrificantes","Lubrax","Direção"],
+["Óleo de direção hidráulica","Fluidos e Lubrificantes","Diversas","Direção"],
+["Fluido de freio DOT 3","Fluidos e Lubrificantes","Bosch","Freios"],
+["Fluido de freio DOT 3","Fluidos e Lubrificantes","Radex","Freios"],
+["Fluido de freio DOT 4","Fluidos e Lubrificantes","Bosch","Freios"],
+["Fluido de freio DOT 4","Fluidos e Lubrificantes","TRW","Freios"],
+["Aditivo de radiador orgânico (OAT)","Fluidos e Lubrificantes","Paraflu","Arrefecimento"],
+["Aditivo de radiador orgânico (OAT)","Fluidos e Lubrificantes","Radex","Arrefecimento"],
+["Fluido de arrefecimento pronto para uso","Fluidos e Lubrificantes","Paraflu","Arrefecimento"],
+["Fluido de arrefecimento pronto para uso","Fluidos e Lubrificantes","Radex","Arrefecimento"],
+["Água desmineralizada","Fluidos e Lubrificantes","Diversas","Arrefecimento"],
+["Aditivo para gasolina","Fluidos e Lubrificantes","Bardahl","Sistema"],
+["Aditivo para diesel","Fluidos e Lubrificantes","Bardahl","Sistema"],
+["Aditivo antiferrugem para combustível","Fluidos e Lubrificantes","Wurth","Sistema"],
+["Graxa para rolamento","Fluidos e Lubrificantes","Fuchs","Sistema"],
+["Graxa para rolamento","Fluidos e Lubrificantes","Diversas","Sistema"],
+["Fluido limpador de para-brisa","Fluidos e Lubrificantes","Diversas","Sistema"],
+["Anel de pistão","Motor","Mahle Metal Leve | Takao | KS | Cofap","Motor"],
+["Bomba de óleo","Motor","Schadek | Takao | Mahle Metal Leve","Motor"],
+["Junta da tampa de válvulas","Motor","Sabó | Elring | Victor Reinz | Taranto","Motor"],
+["Retentor do comando","Motor","Sabó | Corteco | Elring | Victor Reinz","Motor"],
+["Engrenagem do comando","Motor","Takao | Mahle Metal Leve","Motor"],
+["Cárter","Motor","Takao | Cofap","Motor"],
+["Tampa de válvulas","Motor","Takao | Cofap","Motor"],
+["Polia do virabrequim","Motor","Cofap | Continental | Dayco","Motor"],
+["Damper","Motor","Cofap | Continental | Dayco","Motor"],
+["Corrente de comando","Motor","INA | IWIS | Dayco","Motor"],
+["Kit corrente de comando","Motor","INA | Dayco | Continental","Motor"],
+["Tensor da corrente","Motor","INA | Dayco","Motor"],
+["Patim da corrente","Motor","INA | Dayco","Motor"],
+["Tensor da correia dentada","Motor","INA | SKF | Gates | Dayco","Motor"],
+["Polia tensora","Motor","INA | SKF | Gates | Dayco","Motor"],
+["Tensor da correia de acessórios","Motor","INA | SKF | Gates | Dayco","Motor"],
+["Amortecedor dianteiro","Suspensão","Cofap | Monroe | Nakata | KYB","Dianteira"],
+["Amortecedor traseiro","Suspensão","Cofap | Monroe | Nakata | KYB","Traseira"],
+["Rolamento do amortecedor","Suspensão","SKF | Nakata | FAG","Suspensão"],
+["Batente do amortecedor","Suspensão","Axios | Sampel | Nakata","Suspensão"],
+["Coifa do amortecedor","Suspensão","Axios | Sampel | Nakata","Suspensão"],
+["Mola dianteira","Suspensão","Cofap | Fabrini | Aliperti","Dianteira"],
+["Mola traseira","Suspensão","Cofap | Fabrini | Aliperti","Traseira"],
+["Bandeja de suspensão","Suspensão","Nakata | Perfect | Viemar | Cofap","Dianteira"],
+["Braço de suspensão","Suspensão","Nakata | Perfect | Viemar","Suspensão"],
+["Bucha de suspensão","Suspensão","Axios | Sampel | Nakata | Perfect","Suspensão"],
+["Pastilha de freio dianteira","Freios","Cobreq | Fras-le | Bosch | TRW | Jurid | Hipper Freios","Dianteira"],
+["Pastilha de freio traseira","Freios","Cobreq | Fras-le | Bosch | TRW | Jurid | Hipper Freios","Traseira"],
+["Disco de freio dianteiro","Freios","Fremax | Hipper Freios | TRW | Bosch | Cobreq","Dianteira"],
+["Disco de freio traseiro","Freios","Fremax | Hipper Freios | TRW | Bosch | Cobreq","Traseira"],
+["Reparo da pinça","Freios","Controil | TRW | Varga","Dianteira"],
+["Flexível de freio","Freios","Controil | TRW | Varga","Freios"],
+["Cabo do freio de mão","Freios","Cofap | Nakata | IKS","Freios"],
+["Kit freio traseiro","Freios","Cobreq | Fras-le | Controil","Traseira"],
+["Bomba da direção hidráulica","Direção","ZF | TRW | DHB | Nakata","Direção"],
+["Coifa da caixa de direção","Direção","Sabó | Nakata | Perfect","Direção"],
+["Cruzeta da coluna","Direção","Nakata | Perfect | Viemar","Direção"],
+["Reservatório da direção","Direção","TRW | ZF | DHB","Direção"],
+["Atuador hidráulico","Embreagem","Luk | Sachs | Valeo","Motor"],
+["Cilindro mestre da embreagem","Embreagem","Luk | Sachs | Valeo","Motor"],
+["Cilindro escravo","Embreagem","Luk | Sachs | Valeo","Motor"],
+["Kit de reparo do câmbio","Câmbio e transmissão","SKF | FAG | INA | Nakata | Spicer | Dana | Sabó | Corteco","Transmissão"],
+["Rolamento do câmbio","Câmbio e transmissão","SKF | FAG | INA | NSK | NTN","Transmissão"],
+["Retentor do câmbio","Câmbio e transmissão","Sabó | Corteco | SKF | Elring","Transmissão"],
+["Trizeta","Câmbio e transmissão","SKF | Nakata | Spicer | Perfect","Transmissão"],
+["Tulipa","Câmbio e transmissão","SKF | Nakata | Spicer | Perfect","Transmissão"],
+["Semi-eixo","Câmbio e transmissão","Spicer | Nakata | SKF","Dianteira"],
+["Cruzeta","Câmbio e transmissão","Spicer | Dana | Nakata","Transmissão"],
+["Suporte do câmbio","Câmbio e transmissão","Axios | Sampel | Nakata","Motor"],
+["Diferencial","Câmbio e transmissão","Spicer | Dana","Transmissão"],
+["Rolamento de roda dianteiro","Câmbio e transmissão","SKF | FAG | INA | Timken | NSK | NTN | Koyo","Dianteira"],
+["Rolamento de roda traseiro","Câmbio e transmissão","SKF | FAG | INA | Timken | NSK | NTN | Koyo","Traseira"],
+["Carcaça da válvula termostática","Arrefecimento","Mahle | Wahler | MTE-Thomson","Motor"],
+["Ventoinha","Arrefecimento","Valeo | Denso | Bosch","Motor"],
+["Motor da ventoinha","Arrefecimento","Valeo | Denso | Bosch","Motor"],
+["Interruptor térmico","Arrefecimento","MTE-Thomson | Wahler","Motor"],
+["Flange de água","Arrefecimento","MTE-Thomson | Mahle | Wahler","Motor"],
+["Aditivo do radiador","Arrefecimento","Paraflu | Radiex | Tirreno","Arrefecimento"],
+["Compressor do ar-condicionado","Ar-condicionado","Denso | Sanden | Delphi | Valeo | Hella","Ar-condicionado"],
+["Pressostato","Ar-condicionado","Denso | Delphi | Hella","Ar-condicionado"],
+["Motor do ventilador interno","Ar-condicionado","Valeo | Denso | Hella","Interno"],
+["Resistência do ventilador","Ar-condicionado","Denso | Valeo | Hella","Interno"],
+["Polia do compressor","Ar-condicionado","Denso | Sanden | Delphi","Ar-condicionado"],
+["Embreagem do compressor","Ar-condicionado","Denso | Sanden | Delphi","Ar-condicionado"],
+["Sensor TPS","Injeção eletrônica","Bosch | Delphi | MTE-Thomson | Magneti Marelli | Denso","Motor"],
+["Sensor de oxigênio","Injeção eletrônica","Bosch | Delphi | Denso | Magneti Marelli","Motor"],
+["Sensor de detonação","Injeção eletrônica","Bosch | Delphi | MTE-Thomson | Magneti Marelli","Motor"],
+["Flange da bomba","Injeção eletrônica","Bosch | Delphi | Magneti Marelli | VDO","Motor"],
+["Módulo da bomba de combustível","Injeção eletrônica","Bosch | Delphi | Magneti Marelli | Denso","Motor"],
+["Válvula de purga do cânister","Injeção eletrônica","Bosch | Delphi | Magneti Marelli | MTE-Thomson","Motor"],
+["Distribuidor","Ignição","Bosch | Magneti Marelli","Motor"],
+["Tampa do distribuidor","Ignição","Bosch | Magneti Marelli","Motor"],
+["Rotor do distribuidor","Ignição","Bosch | Magneti Marelli","Motor"],
+["Filtro de câmbio automático","Filtros","Wega | Tecfil | Mann | Mahle | Fram","Transmissão"],
+["Filtro hidráulico","Filtros","Wega | Tecfil | Mann | Mahle","Motor"],
+["Filtro separador de água","Filtros","Wega | Mann | Tecfil | Mahle","Motor"],
+["Bendix","Elétrica","Bosch | Valeo | Magneti Marelli | ZEN | ZM","Motor"],
+["Automático do motor de partida","Elétrica","Bosch | ZEN | ZM | Valeo","Motor"],
+["Porta-escovas","Elétrica","Bosch | ZEN | ZM | Gauss","Motor"],
+["Chave de ignição","Elétrica","Kostal | Marília | DNI","Elétrica"],
+["Interruptor de freio","Elétrica","MTE-Thomson | DNI | Marília","Elétrica"],
+["Interruptor de ré","Elétrica","MTE-Thomson | DNI | Marília","Elétrica"],
+["Interruptor de luz","Elétrica","DNI | Marília | MTE-Thomson","Elétrica"],
+["Lâmpada H1","Elétrica","Philips | Osram | Bosch","Iluminação"],
+["Lâmpada H3","Elétrica","Philips | Osram | Bosch","Iluminação"],
+["Lâmpada H4","Elétrica","Philips | Osram | Bosch","Iluminação"],
+["Lâmpada H7","Elétrica","Philips | Osram | Bosch","Iluminação"],
+["Lâmpada HB3","Elétrica","Philips | Osram | Bosch","Iluminação"],
+["Lâmpada HB4","Elétrica","Philips | Osram | Bosch","Iluminação"],
+["Junta do coletor de admissão","Juntas e vedação","Sabó | Elring | Victor Reinz | Taranto","Motor"],
+["Junta do coletor de escape","Juntas e vedação","Sabó | Elring | Victor Reinz | Taranto","Motor"],
+["Junta do cárter","Juntas e vedação","Sabó | Elring | Victor Reinz | Taranto | Corteco","Motor"],
+["Retentor de roda","Juntas e vedação","Sabó | Corteco | SKF","Rodas"],
+["Jogo de juntas superior","Juntas e vedação","Sabó | Elring | Victor Reinz | Taranto","Motor"],
+["Jogo de juntas inferior","Juntas e vedação","Sabó | Elring | Victor Reinz | Taranto","Motor"],
+["Rolamento tensor","Rolamentos","SKF | FAG | INA | NSK | NTN | Koyo","Motor"],
+["Rolamento do alternador","Rolamentos","SKF | FAG | INA | NSK | NTN | Koyo","Motor"],
+["Rolamento do motor de partida","Rolamentos","SKF | FAG | INA | NSK | NTN | Koyo","Motor"],
+["Rolamento do compressor","Rolamentos","SKF | FAG | INA | NSK | NTN | Koyo","Motor"],
+["Rolamento do diferencial","Rolamentos","SKF | FAG | INA | NSK | NTN | Koyo","Transmissão"],
+["Sensor de nível","Combustível","Bosch | Delphi | Magneti Marelli | VDO","Sistema"],
+["Tanque de combustível","Combustível","TSA | Joma | Tanqueplas","Sistema"],
+["Tampa do tanque","Combustível","TSA | Joma | DNI","Sistema"],
+["Válvula do cânister","Combustível","Bosch | Delphi | Magneti Marelli | MTE-Thomson","Sistema"],
+["Cânister","Combustível","Bosch | Delphi | Magneti Marelli","Sistema"],
+["Óleo motor","Lubrificação","Mobil | Lubrax | Petronas | Shell | Castrol | Valvoline | Motul","Motor"],
+["Óleo câmbio manual","Lubrificação","Mobil | Lubrax | Petronas | Shell | Castrol | Motul","Câmbio"],
+["Óleo câmbio automático","Lubrificação","Mobil | Lubrax | Petronas | Shell | Castrol | Motul","Câmbio"],
+["Fluido direção hidráulica","Lubrificação","Mobil | Lubrax | Petronas | Valvoline","Direção"],
+["Farol","Carroceria e iluminação","Arteb | Valeo Cibié | Magneti Marelli | Cofran | Orgus","Dianteira"],
+["Lanterna dianteira","Carroceria e iluminação","Arteb | Valeo Cibié | Magneti Marelli | Cofran | Orgus","Dianteira"],
+["Pisca lateral","Carroceria e iluminação","Arteb | Valeo Cibié | Magneti Marelli | Cofran | Orgus","Lateral"],
+["Farol de neblina","Carroceria e iluminação","Arteb | Valeo Cibié | Magneti Marelli | Cofran | Orgus","Dianteira"],
+["Interruptor do vidro","Carroceria e iluminação","Kostal | Marília | DNI","Porta"],
+["Fechadura da porta","Carroceria e iluminação","Cofran | Marília","Porta"]
+];
+
+/* =========================================================
+   NORMALIZAÇÃO: agrupa o catálogo por peça, unindo marcas
+   de todas as linhas que citam a mesma peça (mesmo nome,
+   ignorando maiúsculas/minúsculas), consolidando categoria,
+   posição e a lista de marcas compatíveis únicas.
+   Resultado: pecas = [{ nome, categoria, marcas:[...], posicao }]
+========================================================= */
+
+function normalizarMarcas(strMarca){
+  if(!strMarca) return [];
+  return strMarca.split(/[|,]/).map(m => m.trim()).filter(Boolean).filter(m => m.toLowerCase() !== "diversas");
+}
+
+function construirCatalogo(linhasRaw){
+  const porNome = new Map(); // chave: nome em minúsculas -> registro
+  linhasRaw.forEach(([nome, categoria, marcaStr, posicao]) => {
+    const chave = nome.toLowerCase();
+    const marcas = normalizarMarcas(marcaStr);
+    if(!porNome.has(chave)){
+      porNome.set(chave, { nome, categoria, posicao, marcas: [] });
+    }
+    const registro = porNome.get(chave);
+    marcas.forEach(m => {
+      if(!registro.marcas.some(x => x.toLowerCase() === m.toLowerCase())) registro.marcas.push(m);
+    });
+    // preserva a primeira categoria/posição não vazias já definidas
+    if(!registro.categoria) registro.categoria = categoria;
+    if(!registro.posicao) registro.posicao = posicao;
+  });
+  return [...porNome.values()];
+}
+
+const servicosRetifica = [
+"Retífica completa do motor","Retífica de bloco","Plainamento de bloco","Retífica de cilindros",
+"Brunimento","Encamisamento","Mandrilhamento","Retífica de virabrequim","Polimento de virabrequim",
+"Balanceamento","Retífica de bielas","Troca de buchas de biela","Retífica de cabeçote",
+"Plainamento de cabeçote","Teste de trinca","Teste hidrostático","Retífica de válvulas",
+"Troca de guias","Retífica de sedes","Assentamento de válvulas","Montagem de motor",
+"Desmontagem de motor","Lavagem de peças","Medição de componentes"
+];
+
+/* catálogo consolidado: um registro por peça, com array de marcas compatíveis */
+let pecas = construirCatalogo(catalogoBaseRaw);
+
+/* peças/marcas cadastradas manualmente pelo usuário (persistidas) */
+let pecasCustom = ls("ac_pecas_custom_v2", []); // [{nome,categoria,marcas:[...],posicao}]
+pecasCustom.forEach(item => {
+  mesclarPecaNoCatalogo(item.nome, item.categoria, item.marcas, item.posicao, false);
+});
+
+/* mescla (ou cria) um registro de peça no catálogo em memória, unindo marcas novas
+   às já existentes para a mesma peça. Retorna o registro final. */
+function mesclarPecaNoCatalogo(nome, categoria, marcasArr, posicao, persistirComoCustom){
+  const chave = nome.toLowerCase();
+  let registro = pecas.find(p => p.nome.toLowerCase() === chave);
+  const marcasNovas = (marcasArr || []).map(m => m.trim()).filter(Boolean);
+
+  if(!registro){
+    registro = { nome, categoria: categoria || "Outros", posicao: posicao || "Não especificada", marcas: [] };
+    pecas.push(registro);
+  }else{
+    if(categoria) registro.categoria = categoria;
+    if(posicao) registro.posicao = posicao;
+  }
+
+  marcasNovas.forEach(m => {
+    if(!registro.marcas.some(x => x.toLowerCase() === m.toLowerCase())) registro.marcas.push(m);
+  });
+
+  if(persistirComoCustom){
+    pecasCustom.push({ nome: registro.nome, categoria: registro.categoria, marcas: [...registro.marcas], posicao: registro.posicao });
+    lsSet("ac_pecas_custom_v2", pecasCustom);
+  }
+
+  return registro;
+}
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+function ls(key,fallback){
+  try{
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  }catch(e){ return fallback; }
+}
+
+function lsSet(key, value){
+  try{
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  }catch(e){
+    console.error("Não foi possível salvar os dados localmente:", e);
+    return false;
+  }
+}
+
+let fornecedores = ls("ac_fornecedores", ["Fornecedor A","Fornecedor B","Fornecedor C","Fornecedor D"]);
+let cotacao = ls("ac_cotacao", []);
+let selecionados = ls("ac_selecionados", []);
+let precos = ls("ac_precos", {});          // precos[fornecedor] = [{preco,disponivel}]
+let cotacaoEnviada = ls("ac_enviada", false);
+let clienteEnvios = ls("ac_cliente_envios", []);
+let servicosFinais = ls("ac_servicos_finais", []); // serviços adicionados após a cotação com fornecedores: {nome,qtd,valor}
+let historicoOrcamentos = ls("ac_historico_orcamentos", []);
+let editingHistoricoIndex = null; // índice (em historicoOrcamentos) do orçamento em edição, se houver — não persiste entre recarregamentos
+let numeroOrcamentoAtual = Number(ls("ac_numero_orcamento_atual", 1000)) || 1000;
+let dataOrcamentoAtual = ls("ac_data_orcamento_atual", new Date().toISOString());
+
+if(!ls("ac_numero_orcamento_atual", null)){
+  const maiorNumeroHistorico = historicoOrcamentos.reduce((maior, o) => Math.max(maior, Number(o.numero) || 0), 999);
+  numeroOrcamentoAtual = Math.max(1000, maiorNumeroHistorico + 1);
+  lsSet("ac_numero_orcamento_atual", numeroOrcamentoAtual);
+}
+
+if(!ls("ac_data_orcamento_atual", null)){
+  dataOrcamentoAtual = new Date().toISOString();
+  lsSet("ac_data_orcamento_atual", dataOrcamentoAtual);
+}
+
+// migração: em versões antigas os serviços ficavam misturados na cotação com fornecedores
+if(cotacao.some(x => x.tipo === "Serviço")){
+  servicosFinais = servicosFinais.concat(
+    cotacao.filter(x => x.tipo === "Serviço").map(x => ({
+      nome: x.nome,
+      qtd: x.qtd || 1,
+      valor: x.valor !== undefined && x.valor !== "" ? (Number(x.valor) || 0) : 0
+    }))
+  );
+  cotacao = cotacao.filter(x => x.tipo !== "Serviço");
+  precos = {};          // os índices mudaram, os preços já lançados por fornecedor ficariam desalinhados
+  cotacaoEnviada = false;
+  lsSet("ac_cotacao", cotacao);
+  lsSet("ac_servicos_finais", servicosFinais);
+  lsSet("ac_precos", precos);
+  lsSet("ac_enviada", cotacaoEnviada);
+}
+let selecaoPecas = new Set(); // índices (do array "pecas") marcados no catálogo
+
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function fmtMoeda(v){
+  return (Number(v)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+
+function save(){
+  lsSet("ac_fornecedores", fornecedores);
+  lsSet("ac_cotacao", cotacao);
+  lsSet("ac_selecionados", selecionados);
+  lsSet("ac_precos", precos);
+  lsSet("ac_enviada", cotacaoEnviada);
+  lsSet("ac_cliente_envios", clienteEnvios);
+  lsSet("ac_servicos_finais", servicosFinais);
+  lsSet("ac_numero_orcamento_atual", numeroOrcamentoAtual);
+  lsSet("ac_data_orcamento_atual", dataOrcamentoAtual);
+  lsSet("ac_historico_orcamentos", historicoOrcamentos);
+
+  renderCotacao();
+  renderForn();
+  renderComparar();
+  renderServicosFinais();
+  renderHistorico();
+  atualizarCabecalhoOrcamento();
+  stats();
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+
+function init(){
+  carregarDadosCarro();
+  preencherFiltros();
+  preencherDatalists();
+  renderPecas();
+  renderCotacao();
+  renderForn();
+  renderComparar();
+  renderServicosFinais();
+  renderHistorico();
+  atualizarBannerEdicao();
+  stats();
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function stats(){
+  document.getElementById("statPecas").textContent = pecas.length;
+  document.getElementById("statServicos").textContent = servicosRetifica.length;
+  document.getElementById("statCotacao").textContent = cotacao.length;
+  document.getElementById("statForn").textContent = selecionados.length;
+
+  const dashResumo = document.getElementById("dashResumo");
+  if(!cotacao.length && !servicosFinais.length){
+    dashResumo.innerHTML = "Nenhum item na cotação ainda. Vá até o Catálogo de Peças para começar.";
+  }else{
+    dashResumo.innerHTML =
+      `<b>${cotacao.length}</b> peça(s) na cotação com fornecedores e <b>${servicosFinais.length}</b> serviço(s) no orçamento final. `+
+      `${selecionados.length} fornecedor(es) selecionado(s).`;
+  }
+}
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+function marcasUnicas(){
+  const set = new Set();
+  pecas.forEach(p => (p.marcas || []).forEach(m => set.add(m)));
+  return [...set].sort();
+}
+
+function marcasDaPecaPorNome(nome){
+  const chave = (nome || "").trim().toLowerCase();
+  const registro = pecas.find(p => p.nome.toLowerCase() === chave);
+  return registro ? [...registro.marcas].sort() : [];
+}
+
+function preencherFiltros(){
+  const categorias = [...new Set(pecas.map(x => x.categoria))].sort();
+  filtroCategoria.innerHTML = '<option value="">Todas as categorias</option>' +
+    categorias.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+
+  const marcas = marcasUnicas();
+  filtroMarca.innerHTML = '<option value="">Todas as marcas</option>' +
+    marcas.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
+
+  atualizarMarcasDoPecaInput();
+
+  const categoriasList = document.getElementById("categoriasList");
+  if(categoriasList){
+    categoriasList.innerHTML = categorias.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
+  }
+  const marcasListCadastro = document.getElementById("marcasListCadastro");
+  if(marcasListCadastro){
+    marcasListCadastro.innerHTML = marcas.map(m => `<option value="${escapeHtml(m)}"></option>`).join("");
+  }
+  const posicoesList = document.getElementById("posicoesList");
+  if(posicoesList){
+    const posicoes = [...new Set(pecas.map(x => x.posicao).filter(Boolean))].sort();
+    posicoesList.innerHTML = posicoes.map(p => `<option value="${escapeHtml(p)}"></option>`).join("");
+  }
+  const pecasNomesList = document.getElementById("pecasNomesList");
+  if(pecasNomesList){
+    pecasNomesList.innerHTML = [...new Set(pecas.map(x => x.nome))].sort().map(n => `<option value="${escapeHtml(n)}"></option>`).join("");
+  }
+}
+
+/* Atualiza dinamicamente o <select> de marca em "Nova Cotação" com
+   somente as marcas compatíveis com a peça digitada no momento —
+   é aqui que a lógica peça -> categoria -> marcas entra em ação. */
+function atualizarMarcasDoPecaInput(){
+  const nome = document.getElementById("pecaInput")?.value || "";
+  const marcasDaPeca = marcasDaPecaPorNome(nome);
+  const marcaSelectAtual = marcaInput.value;
+
+  if(marcasDaPeca.length){
+    marcaInput.innerHTML = '<option value="">Sem marca definida</option>' +
+      marcasDaPeca.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
+  }else{
+    // peça ainda não identificada (ou sem marcas específicas cadastradas): mostra todas as marcas do catálogo
+    marcaInput.innerHTML = '<option value="">Sem marca definida</option>' +
+      marcasUnicas().map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
+  }
+
+  if([...marcaInput.options].some(o => o.value === marcaSelectAtual)){
+    marcaInput.value = marcaSelectAtual;
+  }
+}
+
+function preencherDatalists(){
+  pecasList.innerHTML = [...new Set(pecas.map(x => x.nome))].sort()
+    .map(p => `<option value="${escapeHtml(p)}"></option>`).join("");
+
+  servicosList.innerHTML = servicosRetifica
+    .map(s => `<option value="${escapeHtml(s)}"></option>`).join("");
+}
+
+/* =========================================================
+   NAVEGAÇÃO
+========================================================= */
+
+function showPage(id,btn){
+  document.querySelectorAll("main section").forEach(s => s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+  if(btn){ btn.classList.add("active"); }
+  if(id === "comparar"){ renderComparar(); renderServicosFinais(); atualizarCabecalhoOrcamento(); }
+  if(id === "cotacao"){ atualizarBannerEdicao(); atualizarMarcasDoPecaInput(); }
+  if(id === "historico"){ renderHistorico(); }
+  if(id === "dashboard"){ stats(); }
+}
+
+/* =========================================================
+   CATÁLOGO
+========================================================= */
+
+function renderPecas(){
+  const q = (busca.value || "").toLowerCase().trim();
+  const categoria = filtroCategoria.value;
+  const marca = filtroMarca.value;
+
+  const resultado = pecas.filter(x => {
+    const bateBusca = !q || x.nome.toLowerCase().includes(q) || x.categoria.toLowerCase().includes(q) ||
+      (x.marcas || []).some(m => m.toLowerCase().includes(q));
+    const bateCategoria = !categoria || x.categoria === categoria;
+    const bateMarca = !marca || (x.marcas || []).some(m => m === marca);
+    return bateBusca && bateCategoria && bateMarca;
+  });
+
+  if(!resultado.length){
+    pecasBody.innerHTML = `<tr><td colspan="6" class="empty">Nenhuma peça encontrada com esses filtros.</td></tr>`;
+    return;
+  }
+
+  pecasBody.innerHTML = resultado.map((x) => {
+    const indice = pecas.indexOf(x);
+    const marcado = selecaoPecas.has(indice);
+    const marcasHtml = x.marcas.length
+      ? `<div class="brand-tags">${x.marcas.map(m => `<span class="brand-tag">${escapeHtml(m)}</span>`).join("")}</div>`
+      : `<span class="muted">Diversas (sem marca específica)</span>`;
+    return `
+      <tr>
+        <td><input type="checkbox" ${marcado ? "checked" : ""} onchange="toggleSelecaoPeca(${indice},this.checked)"></td>
+        <td><b>${escapeHtml(x.nome)}</b></td>
+        <td><span class="category-badge">${escapeHtml(x.categoria)}</span></td>
+        <td>${marcasHtml}</td>
+        <td>${escapeHtml(x.posicao)}</td>
+        <td><button class="primary" onclick="usarPeca(${indice})">Usar sozinha</button></td>
+      </tr>`;
+  }).join("");
+
+  atualizarStatusSelecao();
+}
+
+/* =========================================================
+   CADASTRO DE NOVAS PEÇAS / MARCAS
+========================================================= */
+
+function toggleCadastroPeca(){
+  const card = document.getElementById("cardCadastroPeca");
+  const status = document.getElementById("cadastroPecaStatus");
+  if(!card) return;
+  const abrindo = card.classList.contains("hidden");
+  card.classList.toggle("hidden");
+  if(status) status.textContent = "";
+  if(abrindo){
+    document.getElementById("novaPecaNome").value = "";
+    document.getElementById("novaPecaCategoria").value = "";
+    document.getElementById("novaPecaMarca").value = "";
+    document.getElementById("novaPecaPosicao").value = "";
+    card.scrollIntoView({behavior:"smooth", block:"nearest"});
+    document.getElementById("novaPecaNome").focus();
+  }
+}
+
+function cadastrarNovaPeca(){
+  const nomeEl = document.getElementById("novaPecaNome");
+  const categoriaEl = document.getElementById("novaPecaCategoria");
+  const marcaEl = document.getElementById("novaPecaMarca");
+  const posicaoEl = document.getElementById("novaPecaPosicao");
+  const status = document.getElementById("cadastroPecaStatus");
+
+  const nome = nomeEl.value.trim();
+  const categoria = categoriaEl.value.trim() || "Outros";
+  const marcasArr = marcaEl.value.split(",").map(m => m.trim()).filter(Boolean);
+  const posicao = posicaoEl.value.trim() || "Não especificada";
+
+  if(!nome){
+    status.style.color = "var(--bad)";
+    status.textContent = "Informe o nome da peça.";
+    nomeEl.focus();
+    return;
+  }
+
+  const registroExistente = pecas.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+  const marcasRealmenteNovas = registroExistente
+    ? marcasArr.filter(m => !registroExistente.marcas.some(x => x.toLowerCase() === m.toLowerCase()))
+    : marcasArr;
+
+  if(registroExistente && !marcasRealmenteNovas.length && marcasArr.length){
+    status.style.color = "var(--bad)";
+    status.textContent = `A peça "${registroExistente.nome}" já tem essa(s) marca(s) cadastrada(s).`;
+    return;
+  }
+
+  if(registroExistente && !marcasArr.length){
+    status.style.color = "var(--bad)";
+    status.textContent = `A peça "${registroExistente.nome}" já existe no catálogo. Informe ao menos uma marca nova para adicioná-la.`;
+    return;
+  }
+
+  const registro = mesclarPecaNoCatalogo(nome, categoria, marcasArr, posicao, true);
+
+  preencherFiltros();
+  preencherDatalists();
+  renderPecas();
+  stats();
+
+  status.style.color = "var(--good)";
+  status.textContent = registroExistente
+    ? `Marca(s) adicionada(s) a "${registro.nome}". Agora ela tem: ${registro.marcas.join(", ") || "nenhuma marca específica"}.`
+    : `Peça "${nome}" cadastrada com sucesso.`;
+
+  nomeEl.value = "";
+  categoriaEl.value = "";
+  marcaEl.value = "";
+  posicaoEl.value = "";
+  nomeEl.focus();
+}
+
+/* =========================================================
+   SELEÇÃO MÚLTIPLA NO CATÁLOGO
+========================================================= */
+
+function toggleSelecaoPeca(indice, marcado){
+  if(marcado){ selecaoPecas.add(indice); } else { selecaoPecas.delete(indice); }
+  atualizarStatusSelecao();
+}
+
+function limparSelecaoPecas(){
+  selecaoPecas.clear();
+  renderPecas();
+}
+
+function atualizarStatusSelecao(){
+  const status = document.getElementById("selecaoStatus");
+  const btn = document.getElementById("btnAddSelecionadas");
+  if(!status || !btn) return;
+
+  if(selecaoPecas.size){
+    status.textContent = `${selecaoPecas.size} peça(s) selecionada(s).`;
+    btn.disabled = false;
+    btn.textContent = `Adicionar Peças Selecionadas à Nova Cotação (${selecaoPecas.size})`;
+  }else{
+    status.textContent = "Marque as peças que deseja cotar e adicione todas de uma vez.";
+    btn.disabled = true;
+    btn.textContent = "Adicionar Peças Selecionadas à Nova Cotação";
+  }
+}
+
+function adicionarSelecionadasACotacao(){
+  if(!selecaoPecas.size) return;
+
+  let count = 0;
+  selecaoPecas.forEach(indice => {
+    const x = pecas[indice];
+    if(!x) return;
+    cotacao.push({
+      tipo:"Peça",
+      nome:x.nome,
+      marca:"",
+      qtd:1,
+      acrescimo:0
+    });
+    count++;
+  });
+
+  resetarEnvio();
+  selecaoPecas.clear();
+  save();
+  renderPecas();
+
+  showPage("cotacao", document.querySelectorAll(".nav button")[2]);
+  addStatus.textContent = `${count} peça(s) adicionada(s) à cotação. Ajuste marca e quantidade de cada uma na lista abaixo, se necessário.`;
+}
+
+/* =========================================================
+   USAR PEÇA
+========================================================= */
+
+function usarPeca(i){
+  const x = pecas[i];
+  pecaInput.value = x.nome;
+  atualizarMarcasDoPecaInput();
+  marcaInput.value = "";
+  qtdInput.value = 1;
+  localizacaoInput.value = "";
+  showPage("cotacao", document.querySelectorAll(".nav button")[2]);
+  setTimeout(() => { pecaInput.focus(); }, 100);
+}
+
+/* =========================================================
+   ADICIONAR PEÇA / SERVIÇO
+========================================================= */
+
+function adicionarCotacao(){
+  const nome = pecaInput.value.trim();
+  const marca = marcaInput.value;
+  const qtd = Math.max(1, Number(qtdInput.value) || 1);
+  const localizacao = localizacaoInput.value;
+
+  if(!nome){ addStatus.style.color = "var(--bad)"; addStatus.textContent = "Informe a peça."; pecaInput.focus(); return; }
+
+  cotacao.push({ tipo:"Peça", nome, marca, qtd, localizacao, acrescimo:0 });
+  resetarEnvio();
+  save();
+
+  pecaInput.value = "";
+  marcaInput.value = "";
+  qtdInput.value = 1;
+  localizacaoInput.value = "";
+  atualizarMarcasDoPecaInput();
+
+  addStatus.style.color = "var(--good)";
+  addStatus.textContent = `${nome} adicionada. Você pode adicionar outra peça.`;
+  pecaInput.focus();
+}
+
+function novaLinhaCotacao(){
+  pecaInput.value = "";
+  marcaInput.value = "";
+  qtdInput.value = 1;
+  localizacaoInput.value = "";
+  atualizarMarcasDoPecaInput();
+  addStatus.style.color = "var(--good)";
+  addStatus.textContent = "Nova peça: informe o item.";
+  pecaInput.focus();
+}
+
+/* =========================================================
+   RENDER COTAÇÃO
+========================================================= */
+
+function renderCotacao(){
+  if(!cotacao.length){
+    cotacaoBody.innerHTML = `<tr><td colspan="6" class="empty">Nenhum item adicionado à cotação.</td></tr>`;
+    resumoItensCotacao.innerHTML = "";
+    return;
+  }
+
+  resumoItensCotacao.innerHTML = `<p class="subtitle">${cotacao.length} item(ns) prontos para cotar.</p>`;
+
+  const opcoesLocalizacao = ["Dianteira Esquerda","Dianteira Direita","Traseira Direita","Traseira Esquerda","Esquerda","Direita","Ambas"];
+
+  cotacaoBody.innerHTML = cotacao.map((x,i) => {
+    const marcasDisponiveis = x.tipo === "Serviço" ? [] : marcasDaPecaPorNome(x.nome);
+    return `
+    <tr>
+      <td><span class="${x.tipo === 'Serviço' ? 'badge-blue' : 'badge'}">${escapeHtml(x.tipo)}</span></td>
+      <td><b>${escapeHtml(x.nome)}</b></td>
+      <td>
+        ${x.tipo === "Serviço" ? '<span class="muted">—</span>' : `
+        <select style="min-width:140px" onchange="atualizarItemCotacao(${i},'marca',this.value)">
+          <option value="">Sem marca definida</option>
+          ${marcasDisponiveis.map(m => `<option value="${escapeHtml(m)}" ${x.marca===m?"selected":""}>${escapeHtml(m)}</option>`).join("")}
+        </select>`}
+      </td>
+      <td>
+        ${x.tipo === "Serviço" ? '<span class="muted">—</span>' : `
+        <select style="min-width:150px" onchange="atualizarItemCotacao(${i},'localizacao',this.value)">
+          <option value="" ${!x.localizacao?"selected":""}>Não especificada</option>
+          ${opcoesLocalizacao.map(l => `<option value="${escapeHtml(l)}" ${x.localizacao===l?"selected":""}>${escapeHtml(l)}</option>`).join("")}
+        </select>`}
+      </td>
+      <td><input type="number" min="1" value="${x.qtd}" style="max-width:80px" onchange="atualizarItemCotacao(${i},'qtd',this.value)"></td>
+      <td>
+        ${x.tipo === "Serviço"
+          ? `<input type="number" min="0" step="0.01" placeholder="R$ 0,00" value="${x.valor !== undefined && x.valor !== "" ? x.valor : ""}" style="max-width:120px" onchange="atualizarItemCotacao(${i},'valor',this.value)">`
+          : '<span class="muted">—</span>'}
+      </td>
+      <td><button class="danger" onclick="removerCotacao(${i})">Remover</button></td>
+    </tr>
+  `;
+  }).join("");
+}
+
+function atualizarItemCotacao(i, campo, valor){
+  if(!cotacao[i]) return;
+  if(campo === "qtd"){ cotacao[i].qtd = Math.max(1, Number(valor) || 1); }
+  if(campo === "marca"){ cotacao[i].marca = valor; }
+  if(campo === "localizacao"){ cotacao[i].localizacao = valor; }
+  if(campo === "valor"){ cotacao[i].valor = valor !== "" ? Math.max(0, Number(valor) || 0) : ""; }
+  resetarEnvio();
+  save();
+}
+
+function removerCotacao(i){
+  cotacao.splice(i,1);
+  resetarEnvio();
+  save();
+}
+
+function resetarEnvio(){
+  // uma mudança na lista de itens invalida os preços já lançados por fornecedor
+  precos = {};
+  cotacaoEnviada = false;
+  document.getElementById("finalCotacao")?.classList.add("hidden");
+}
+
+/* =========================================================
+   DADOS DO VEÍCULO
+========================================================= */
+
+function dadosCarro(){
+  return {
+    marca: document.getElementById("carroMarca")?.value.trim() || "",
+    modelo: document.getElementById("carroModelo")?.value.trim() || "",
+    ano: document.getElementById("carroAno")?.value.trim() || "",
+    motor: document.getElementById("carroMotor")?.value.trim() || "",
+    placa: document.getElementById("carroPlaca")?.value.trim() || "",
+    km: document.getElementById("carroKm")?.value.trim() || ""
+  };
+}
+
+function salvarDadosCarro(){
+  lsSet("ac_dadosCarro", dadosCarro());
+}
+
+function carregarDadosCarro(){
+  const d = ls("ac_dadosCarro", {});
+  const campos = { carroMarca:d.marca, carroModelo:d.modelo, carroAno:d.ano, carroMotor:d.motor, carroPlaca:d.placa, carroKm:d.km };
+  Object.keys(campos).forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.value = campos[id] || ""; }
+  });
+}
+
+/* =========================================================
+   FINALIZAR COTAÇÃO
+========================================================= */
+
+function finalizarCotacao(){
+  if(!cotacao.length){ alert("Adicione pelo menos uma peça ou serviço à cotação."); return; }
+
+  salvarDadosCarro();
+  const d = dadosCarro();
+
+  const veiculoLinhas = [
+    (d.marca || d.modelo) ? `Veículo: ${[d.marca, d.modelo].filter(Boolean).join(" ")}` : "",
+    d.ano ? `Ano: ${d.ano}` : "",
+    d.motor ? `Motor: ${d.motor}` : "",
+    d.placa ? `Placa: ${d.placa}` : "",
+    d.km ? `Quilometragem: ${d.km}` : ""
+  ].filter(Boolean);
+
+  const blocoVeiculo = veiculoLinhas.length
+    ? `🚗 DADOS DO VEÍCULO\n${veiculoLinhas.join("\n")}\n\n`
+    : "";
+
+  const linhaItem = x => `${x.qtd}x ${x.nome}${x.marca ? ` — Marca: ${x.marca}` : ""}`;
+
+  const itensPecas = cotacao.filter(x => x.tipo !== "Serviço");
+  const itensServicos = cotacao.filter(x => x.tipo === "Serviço");
+
+  const blocoPecas = itensPecas.length
+    ? `🔧 PEÇAS PARA COTAÇÃO\n${itensPecas.map(linhaItem).join("\n")}\n\n`
+    : "";
+
+  const blocoServicos = itensServicos.length
+    ? `🛠️ SERVIÇOS PARA COTAÇÃO\n${itensServicos.map(linhaItem).join("\n")}\n\n`
+    : "";
+
+  textoCotacao.value =
+`SOLICITAÇÃO DE COTAÇÃO
+Olá! Gostaríamos de solicitar uma cotação para os itens abaixo.
+
+${blocoVeiculo}${blocoPecas}${blocoServicos}Por favor, informar valor unitário e disponibilidade de cada item.
+Obrigado!`;
+
+  finalCotacao.classList.remove("hidden");
+  finalCotacao.scrollIntoView({behavior:"smooth"});
+}
+
+/* =========================================================
+   COPIAR COTAÇÃO
+========================================================= */
+
+async function copiarTexto(texto, statusEl){
+  try{
+    await navigator.clipboard.writeText(texto);
+    statusEl.style.color = "var(--good)";
+    statusEl.textContent = "Copiado para a área de transferência!";
+  }catch(e){
+    const temp = document.createElement("textarea");
+    temp.value = texto;
+    temp.style.position = "fixed";
+    temp.style.left = "-9999px";
+    document.body.appendChild(temp);
+    temp.select();
+    try{
+      document.execCommand("copy");
+      statusEl.style.color = "var(--good)";
+      statusEl.textContent = "Copiado para a área de transferência!";
+    }
+    catch(e2){
+      statusEl.style.color = "var(--bad)";
+      statusEl.textContent = "Não foi possível copiar automaticamente. Selecione o texto manualmente.";
+    }
+    document.body.removeChild(temp);
+  }
+}
+
+function copiarCotacao(){
+  if(!textoCotacao.value.trim()){ finalizarCotacao(); }
+  copiarTexto(textoCotacao.value, copyStatus);
+}
+
+/* =========================================================
+   FORNECEDORES
+========================================================= */
+
+function renderForn(){
+  if(!fornecedores.length){
+    fornBody.innerHTML = `<tr><td colspan="5" class="empty">Nenhum fornecedor cadastrado.</td></tr>`;
+    return;
+  }
+
+  fornBody.innerHTML = fornecedores.map((f,i) => `
+    <tr>
+      <td><input type="checkbox" ${selecionados.includes(f) ? "checked" : ""} onchange="toggleForn(${i},this.checked)"></td>
+      <td><b>${escapeHtml(f)}</b></td>
+      <td>Brasil</td>
+      <td><span class="badge">Ativo</span></td>
+      <td><button class="danger" onclick="excluirFornecedor(${i})">Excluir</button></td>
+    </tr>
+  `).join("");
+}
+
+function toggleForn(i,on){
+  const f = fornecedores[i];
+  if(f === undefined) return;
+  if(on && !selecionados.includes(f)){ selecionados.push(f); }
+  if(!on){ selecionados = selecionados.filter(x => x !== f); delete precos[f]; }
+  save();
+}
+
+function adicionarFornecedor(){
+  const input = document.getElementById("novoFornecedor");
+  const status = document.getElementById("fornecedorStatus");
+  const nome = input.value.trim();
+
+  if(!nome){ status.textContent = "Informe o nome do fornecedor."; status.style.color = "var(--bad)"; input.focus(); return; }
+
+  if(fornecedores.some(f => f.toLowerCase() === nome.toLowerCase())){
+    status.textContent = "Esse fornecedor já está cadastrado.";
+    status.style.color = "var(--bad)";
+    return;
+  }
+
+  fornecedores.push(nome);
+  save();
+
+  input.value = "";
+  status.style.color = "var(--good)";
+  status.textContent = `Fornecedor "${nome}" adicionado.`;
+  input.focus();
+}
+
+function excluirFornecedor(i){
+  const nome = fornecedores[i];
+  if(!confirm(`Excluir o fornecedor "${nome}"?`)) return;
+
+  fornecedores.splice(i,1);
+  selecionados = selecionados.filter(x => x !== nome);
+  delete precos[nome];
+  save();
+}
+
+/* =========================================================
+   ENVIAR COTAÇÃO AOS SELECIONADOS
+========================================================= */
+
+function enviarCotacao(){
+  const status = document.getElementById("enviarStatus");
+
+  if(!cotacao.length){
+    status.style.color = "var(--bad)";
+    status.textContent = "Adicione itens à cotação antes de enviar.";
+    return;
+  }
+
+  if(!selecionados.length){
+    status.style.color = "var(--bad)";
+    status.textContent = "Selecione ao menos um fornecedor.";
+    return;
+  }
+
+  selecionados.forEach(f => {
+    if(!precos[f] || precos[f].length !== cotacao.length){
+      precos[f] = cotacao.map((item,i) => {
+        if(precos[f] && precos[f][i]){
+          const linha = precos[f][i];
+          if(linha.marca === undefined) linha.marca = item.marca || "";
+          if(!linha.precosPorMarca || typeof linha.precosPorMarca !== "object") linha.precosPorMarca = {};
+          if(linha.marca && linha.preco !== "" && linha.precosPorMarca[linha.marca] === undefined) linha.precosPorMarca[linha.marca] = linha.preco;
+          return linha;
+        }
+        const precoInicial = (item.tipo === "Serviço" && item.valor !== undefined && item.valor !== "") ? item.valor : "";
+        return { preco:precoInicial, disponivel:true, marca:item.marca || "", precosPorMarca:{} };
+      });
+    }
+  });
+
+  cotacaoEnviada = true;
+  save();
+
+  status.style.color = "var(--good)";
+  status.textContent = `Cotação enviada para ${selecionados.length} fornecedor(es). Agora informe os preços em "Comparar Itens".`;
+
+  showPage("comparar", document.querySelectorAll(".nav button")[4]);
+}
+
+/* =========================================================
+   COMPARAR ITENS
+========================================================= */
+
+function garantirLinhaPreco(forn, idx){
+  if(!precos[forn]) precos[forn] = cotacao.map((item)=>({preco:"",disponivel:true,marca:item?.marca || "",precosPorMarca:{}}));
+  if(!precos[forn][idx]) precos[forn][idx] = {preco:"",disponivel:true,marca:cotacao[idx]?.marca || "",precosPorMarca:{}};
+  const linha = precos[forn][idx];
+  if(!linha.precosPorMarca || typeof linha.precosPorMarca !== "object") linha.precosPorMarca = {};
+  if(linha.marca === undefined) linha.marca = cotacao[idx]?.marca || "";
+  if(linha.marca && linha.preco !== "" && linha.precosPorMarca[linha.marca] === undefined){
+    linha.precosPorMarca[linha.marca] = linha.preco;
+  }
+  return linha;
+}
+
+function atualizarPreco(idxForn, idx, valor){
+  const forn = selecionados[idxForn];
+  if(forn === undefined) return;
+  const linha = garantirLinhaPreco(forn, idx);
+  const numero = valor === "" ? "" : Math.max(0, Number(valor) || 0);
+  linha.preco = numero;
+  const marca = cotacao[idx]?.marca || linha.marca || "";
+  if(marca) linha.precosPorMarca[marca] = numero;
+  linha.marca = marca;
+  lsSet("ac_precos", precos);
+  renderComparar();
+}
+
+function marcasDoItem(item){
+  return marcasDaPecaPorNome(item.nome);
+}
+
+function atualizarMarcaComparacao(idx, marca){
+  if(!cotacao[idx]) return;
+  cotacao[idx].marca = marca || "";
+
+  // A marca escolhida no orçamento final passa a determinar qual preço por marca será usado.
+  // Os preços de cada fornecedor ficam preservados individualmente.
+  selecionados.forEach(f => {
+    const linha = garantirLinhaPreco(f, idx);
+    if(marca && linha.precosPorMarca[marca] !== undefined){
+      linha.preco = linha.precosPorMarca[marca];
+    }
+  });
+
+  lsSet("ac_cotacao", cotacao);
+  lsSet("ac_precos", precos);
+  renderComparar();
+  prepararEnvioClienteSeVisivel();
+}
+
+function atualizarMarcaFornecedor(idxForn, idx, marca){
+  const forn = selecionados[idxForn];
+  if(forn === undefined || !cotacao[idx]) return;
+  const linha = garantirLinhaPreco(forn, idx);
+  linha.marca = marca || "";
+  if(marca && linha.precosPorMarca[marca] !== undefined){
+    linha.preco = linha.precosPorMarca[marca];
+  }
+  lsSet("ac_precos", precos);
+  renderComparar();
+}
+
+function prepararEnvioClienteSeVisivel(){
+  const preview = document.getElementById("previewCliente");
+  if(preview && !preview.classList.contains("hidden")) prepararEnvioCliente();
+}
+
+function atualizarDisponibilidade(idxForn, idx, disp){
+  const forn = selecionados[idxForn];
+  if(forn === undefined) return;
+  const linha = garantirLinhaPreco(forn, idx);
+  linha.disponivel = disp;
+  lsSet("ac_precos", precos);
+  renderComparar();
+}
+
+function melhoresPrecosDe(cotacaoArr, selecionadosArr, precosObj){
+  // retorna array paralelo a "cotacaoArr" com { valor, fornecedor } do menor preço disponível
+  // função pura: não lê nem altera nenhuma variável global, por isso pode ser usada
+  // tanto para a cotação atual quanto para qualquer orçamento salvo no histórico.
+  return (cotacaoArr || []).map((item, idx) => {
+    let melhor = null;
+    (selecionadosArr || []).forEach(f => {
+      const linha = precosObj?.[f]?.[idx];
+      const marcaCompativel = !item.marca || !linha?.marca || linha.marca === item.marca;
+      if(linha && marcaCompativel && linha.disponivel && linha.preco !== "" && !isNaN(Number(linha.preco))){
+        const v = Number(linha.preco);
+        if(v > 0 && (melhor === null || v < melhor.valor)){ melhor = { valor:v, fornecedor:f }; }
+      }
+    });
+    return melhor;
+  });
+}
+
+function melhoresPrecosPorItem(){
+  return melhoresPrecosDe(cotacao, selecionados, precos);
+}
+
+function renderComparar(){
+  const wrap = document.getElementById("fornecedorCotacoes");
+  if(!wrap) return;
+
+  if(!cotacao.length){
+    wrap.innerHTML = `<div class="card empty">Nenhuma cotação em andamento. Crie uma cotação e envie aos fornecedores primeiro.</div>`;
+    return;
+  }
+
+  if(!selecionados.length){
+    wrap.innerHTML = `<div class="card empty">Nenhum fornecedor selecionado. Vá até "Fornecedores" para selecionar e enviar a cotação.</div>`;
+    return;
+  }
+
+  if(!cotacaoEnviada){
+    wrap.innerHTML = `<div class="card empty">Cotação ainda não enviada aos fornecedores. Vá até "Fornecedores" e clique em "Enviar cotação aos selecionados".</div>`;
+    return;
+  }
+
+  const melhores = melhoresPrecosPorItem();
+
+  // total por fornecedor (apenas itens preenchidos e disponíveis)
+  const totais = selecionados.map(f => {
+    let total = 0, completos = 0;
+    cotacao.forEach((item, idx) => {
+      const linha = precos[f]?.[idx];
+      if(linha && linha.disponivel && linha.preco !== "" && !isNaN(Number(linha.preco))){
+        total += Number(linha.preco) * item.qtd;
+        completos++;
+      }
+    });
+    return { fornecedor:f, total, completos };
+  });
+
+  const totalCompleto = totais.filter(t => t.completos === cotacao.length);
+  const menorTotal = totalCompleto.length ? Math.min(...totalCompleto.map(t => t.total)) : null;
+
+  wrap.innerHTML = selecionados.map((f, idxForn) => {
+    const t = totais.find(x => x.fornecedor === f);
+    const ehMelhor = menorTotal !== null && t.completos === cotacao.length && t.total === menorTotal;
+
+    const linhasHtml = cotacao.map((item, idx) => {
+      const linha = precos[f]?.[idx] || { preco:"", disponivel:true, marca:item.marca || "", precosPorMarca:{} };
+      const ehMelhorItem = melhores[idx] && melhores[idx].fornecedor === f;
+
+      return `
+        <tr>
+          <td><span class="${item.tipo === 'Serviço' ? 'badge-blue' : 'badge'}">${escapeHtml(item.tipo)}</span></td>
+          <td>
+            <b>${escapeHtml(item.nome)}</b>
+            ${item.tipo !== "Serviço" ? `
+              <select style="min-width:150px;margin-top:6px" onchange="atualizarMarcaFornecedor(${idxForn},${idx},this.value)">
+                <option value="">Sem marca definida</option>
+                ${marcasDoItem(item).map(m => `<option value="${escapeHtml(m)}" ${linha.marca===m?"selected":""}>${escapeHtml(m)}</option>`).join("")}
+              </select>` : ""}
+            ${ehMelhorItem ? '<span class="best-badge">MELHOR PREÇO</span>' : ""}
+          </td>
+          <td>${item.qtd}</td>
+          <td>
+            <input class="price-input" type="number" min="0" step="0.01" placeholder="R$ 0,00"
+              value="${linha.preco !== "" ? linha.preco : ""}"
+              onchange="atualizarPreco(${idxForn},${idx},this.value)"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+          </td>
+          <td>
+            <select onchange="atualizarDisponibilidade(${idxForn},${idx},this.value==='sim')">
+              <option value="sim" ${linha.disponivel ? "selected" : ""}>Disponível</option>
+              <option value="nao" ${!linha.disponivel ? "selected" : ""}>Indisponível</option>
+            </select>
+          </td>
+        </tr>`;
+    }).join("");
+
+    return `
+      <div class="forn-compare-card">
+        <div class="forn-compare-head">
+          <h3>${escapeHtml(f)} ${ehMelhor ? '<span class="best-badge">MELHOR ORÇAMENTO</span>' : ""}</h3>
+          <div class="forn-total">${t.completos === cotacao.length ? fmtMoeda(t.total) : `${fmtMoeda(t.total)} <small class="muted" style="font-size:11px;font-weight:500">(${t.completos}/${cotacao.length} preços)</small>`}</div>
+        </div>
+        <table>
+          <thead><tr><th>Tipo</th><th>Item</th><th>Qtd.</th><th>Preço unit.</th><th>Status</th></tr></thead>
+          <tbody>${linhasHtml}</tbody>
+        </table>
+      </div>`;
+  }).join("");
+
+  renderAcrescimo(melhores);
+}
+
+/* =========================================================
+   ACRÉSCIMO SOBRE O FORNECEDOR (MARGEM DE VENDA)
+========================================================= */
+
+function calcularValorFinal(valorFornecedor, acrescimo){
+  const v = Number(valorFornecedor) || 0;
+  const p = Number(acrescimo) || 0;
+  return v + (v * p / 100);
+}
+
+function renderAcrescimo(melhores){
+  const wrap = document.getElementById("acrescimoCotacoes");
+  if(!wrap) return;
+
+  if(!cotacao.length || !selecionados.length || !cotacaoEnviada){
+    wrap.innerHTML = "";
+    return;
+  }
+
+  melhores = melhores || melhoresPrecosPorItem();
+
+  const linhas = cotacao.map((item, idx) => {
+    const m = melhores[idx];
+
+    if(!m){
+      return `
+        <tr>
+          <td><b>${escapeHtml(item.nome)}</b>${item.marca ? ` <span class="muted">(${escapeHtml(item.marca)})</span>` : ""}</td>
+          <td><span class="muted">—</span></td>
+          <td><span class="muted">A confirmar</span></td>
+          <td><span class="muted">—</span></td>
+          <td><span class="muted">—</span></td>
+        </tr>`;
+    }
+
+    const acrescimo = item.acrescimo !== undefined && item.acrescimo !== "" ? item.acrescimo : 0;
+    const valorFinal = calcularValorFinal(m.valor, acrescimo);
+
+    return `
+      <tr>
+        <td>
+          <b>${escapeHtml(item.nome)}</b>
+          ${item.tipo !== "Serviço" ? `
+            <select style="min-width:150px;margin-top:6px" onchange="atualizarMarcaComparacao(${idx},this.value)">
+              <option value="">Sem marca definida</option>
+              ${marcasDoItem(item).map(m => `<option value="${escapeHtml(m)}" ${item.marca===m?"selected":""}>${escapeHtml(m)}</option>`).join("")}
+            </select>` : ""}
+        </td>
+        <td>${escapeHtml(m.fornecedor)}</td>
+        <td>${fmtMoeda(m.valor)}</td>
+        <td>
+          <input type="number" min="0" step="0.01" style="max-width:100px" value="${acrescimo}"
+            onchange="atualizarAcrescimo(${idx}, this.value)"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+        </td>
+        <td><b>${fmtMoeda(valorFinal)}</b></td>
+      </tr>`;
+  }).join("");
+
+  wrap.innerHTML = `
+    <div class="card">
+      <h2>Acréscimo sobre o fornecedor</h2>
+      <p class="subtitle">Informe manualmente o percentual de margem desejado sobre o valor do fornecedor (menor preço disponível) para cada item. O valor final de venda é recalculado automaticamente.</p>
+      <table>
+        <thead><tr><th>Item</th><th>Fornecedor</th><th>Valor Fornecedor</th><th>Acréscimo (%)</th><th>Valor Final</th></tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+}
+
+function atualizarAcrescimo(idx, valor){
+  if(!cotacao[idx]) return;
+  cotacao[idx].acrescimo = valor !== "" ? Math.max(0, Number(valor) || 0) : 0;
+  save();
+}
+
+/* =========================================================
+   SERVIÇOS DO ORÇAMENTO FINAL (não passam por fornecedor)
+========================================================= */
+
+function adicionarServicoFinal(){
+  const nomeEl = document.getElementById("servicoFinalInput");
+  const qtdEl = document.getElementById("qtdServicoFinalInput");
+  const valorEl = document.getElementById("valorServicoFinalInput");
+  const statusEl = document.getElementById("servicoFinalStatus");
+
+  const nome = nomeEl.value.trim();
+  const qtd = Math.max(1, Number(qtdEl.value) || 1);
+  const valor = Math.max(0, Number(valorEl.value) || 0);
+
+  if(!nome){ statusEl.style.color = "var(--bad)"; statusEl.textContent = "Informe o nome do serviço."; nomeEl.focus(); return; }
+
+  servicosFinais.push({ nome, qtd, valor });
+  save();
+
+  nomeEl.value = "";
+  qtdEl.value = 1;
+  valorEl.value = "";
+
+  statusEl.style.color = "var(--good)";
+  statusEl.textContent = `Serviço "${nome}" adicionado ao orçamento final.`;
+  nomeEl.focus();
+}
+
+function atualizarServicoFinal(i, campo, valor){
+  if(!servicosFinais[i]) return;
+  if(campo === "qtd"){ servicosFinais[i].qtd = Math.max(1, Number(valor) || 1); }
+  if(campo === "valor"){ servicosFinais[i].valor = Math.max(0, Number(valor) || 0); }
+  save();
+}
+
+function removerServicoFinal(i){
+  servicosFinais.splice(i,1);
+  save();
+}
+
+function renderServicosFinais(){
+  const body = document.getElementById("servicosFinaisBody");
+  if(!body) return;
+
+  if(!servicosFinais.length){
+    body.innerHTML = `<tr><td colspan="5" class="empty">Nenhum serviço adicionado ao orçamento ainda.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = servicosFinais.map((s,i) => `
+    <tr>
+      <td><b>${escapeHtml(s.nome)}</b></td>
+      <td><input type="number" min="1" value="${s.qtd}" style="max-width:80px" onchange="atualizarServicoFinal(${i},'qtd',this.value)"></td>
+      <td><input type="number" min="0" step="0.01" value="${s.valor}" style="max-width:120px" onchange="atualizarServicoFinal(${i},'valor',this.value)"></td>
+      <td>${fmtMoeda(s.valor * s.qtd)}</td>
+      <td><button class="danger" onclick="removerServicoFinal(${i})">Remover</button></td>
+    </tr>
+  `).join("");
+}
+
+/* =========================================================
+   ENVIO AO CLIENTE
+========================================================= */
+
+function prepararEnvioCliente(){
+  const temFornecedorAtivo = cotacaoEnviada && selecionados.length > 0;
+  const melhores = temFornecedorAtivo ? melhoresPrecosPorItem() : cotacao.map(() => null);
+  const pecasPendentes = cotacao.length > 0 && melhores.some(m => m === null);
+  const temAlgumaPecaComPreco = melhores.some(m => m !== null);
+
+  if(!temAlgumaPecaComPreco && !servicosFinais.length){
+    alert("Informe os preços dos fornecedores para as peças e/ou adicione serviços ao orçamento antes de gerar a prévia do cliente.");
+    return;
+  }
+
+  const d = dadosCarro();
+  const cliente = document.getElementById("clienteNome").value.trim() || "Cliente";
+  const telefone = document.getElementById("clienteWhatsapp")?.value.trim() || "";
+  const obs = document.getElementById("clienteObs").value.trim();
+
+  let totalPecas = 0;
+  const linhasPecas = [];
+  cotacao.forEach((item, idx) => {
+    const m = melhores[idx];
+    if(!m) return; // peça ainda sem preço de fornecedor não entra no orçamento do cliente
+    const valorFinal = calcularValorFinal(m.valor, item.acrescimo);
+    const subtotal = valorFinal * item.qtd;
+    totalPecas += subtotal;
+    linhasPecas.push({ label: `${item.qtd}x ${item.nome}${item.localizacao ? ` (${item.localizacao})` : ""}`, valor: subtotal });
+  });
+
+  let totalServicos = 0;
+  const linhasServicos = servicosFinais.map(s => {
+    const qtd = Number(s.qtd) || 1;
+    const subtotal = (Number(s.valor) || 0) * qtd;
+    totalServicos += subtotal;
+    return { label: qtd > 1 ? `${qtd}x ${s.nome}` : s.nome, valor: subtotal };
+  });
+
+  const total = totalPecas + totalServicos;
+
+  // cabeçalho da prévia (número/data do orçamento) — atualizado via JS, nunca hardcoded no HTML
+  const tituloEl = document.getElementById("previewTituloOrcamento");
+  const subEl = document.getElementById("previewSubOrcamento");
+  if(tituloEl) tituloEl.textContent = `Prévia do orçamento #${numeroOrcamentoAtual}`;
+  if(subEl) subEl.textContent = `Data: ${new Date(dataOrcamentoAtual).toLocaleDateString("pt-BR")} — Esta é a informação comercial que será apresentada ao cliente.`;
+
+  const clienteHtml = `
+    <p><b>Cliente:</b> ${escapeHtml(cliente)}</p>
+    ${telefone ? `<p><b>WhatsApp:</b> ${escapeHtml(telefone)}</p>` : ""}`;
+
+  const veiculoHtml = (d.marca || d.modelo || d.ano || d.motor || d.placa)
+    ? `
+      <div class="preview-vehicle">
+        ${d.marca || d.modelo ? `<div class="preview-info"><small>Veículo</small><strong>${escapeHtml(d.marca)} ${escapeHtml(d.modelo)}</strong></div>` : ""}
+        ${d.ano ? `<div class="preview-info"><small>Ano</small><strong>${escapeHtml(d.ano)}</strong></div>` : ""}
+        ${d.motor ? `<div class="preview-info"><small>Motor</small><strong>${escapeHtml(d.motor)}</strong></div>` : ""}
+        ${d.placa ? `<div class="preview-info"><small>Placa</small><strong>${escapeHtml(d.placa)}</strong></div>` : ""}
+      </div>` : "";
+
+  const tabelaCategoria = (titulo, linhas) => linhas.length ? `
+    <h3 style="margin:16px 0 6px">${titulo}</h3>
+    <table class="preview-items">
+      <tbody>
+        ${linhas.map(l => `<tr><td>${escapeHtml(l.label)}</td><td style="text-align:right">${fmtMoeda(l.valor)}</td></tr>`).join("")}
+      </tbody>
+    </table>` : "";
+
+  const corpoHtml = `
+    ${tabelaCategoria("Peças", linhasPecas)}
+    ${tabelaCategoria("Serviços", linhasServicos)}
+    <div class="preview-total">${fmtMoeda(total)} <small>total geral</small></div>
+    ${pecasPendentes ? '<p class="muted" style="margin-top:10px">Algumas peças ainda não têm preço informado por nenhum fornecedor e não entraram neste orçamento.</p>' : ""}
+    ${obs ? `<p class="muted" style="margin-top:10px"><b>Observação:</b> ${escapeHtml(obs)}</p>` : ""}
+  `;
+
+  previewVisual.innerHTML = `${clienteHtml}${veiculoHtml}${corpoHtml}`;
+
+  // Área de impressão / PDF: mostra somente os valores finais ao cliente —
+  // nunca o nome do fornecedor, o custo original ou qualquer percentual/margem.
+  const dataHoje = new Date().toLocaleDateString("pt-BR");
+  printArea.innerHTML = `
+    <div class="preview-box" style="border-color:#ccc">
+      <div class="preview-head" style="border-color:#ccc">
+        <div>
+          <div class="preview-title">Orçamento #${numeroOrcamentoAtual} — AutoCotação Brasil</div>
+          <div class="preview-sub">Emitido em ${dataHoje}</div>
+        </div>
+      </div>
+      ${clienteHtml}
+      ${veiculoHtml}
+      ${corpoHtml}
+    </div>
+  `;
+
+  const blocoTexto = (titulo, linhas) => linhas.length
+    ? `${titulo}\n${linhas.map(l => `* ${l.label} — ${fmtMoeda(l.valor)}`).join("\n")}\n\n`
+    : "";
+
+  textoCliente.value =
+`Orçamento #${numeroOrcamentoAtual} — ${new Date(dataOrcamentoAtual).toLocaleDateString("pt-BR")}
+Orçamento para ${cliente}
+${telefone ? `WhatsApp: ${telefone}\n` : ""}
+${d.marca || d.modelo ? `Veículo: ${d.marca} ${d.modelo} ${d.ano ? "("+d.ano+")" : ""}\n\n` : ""}${blocoTexto("Peças", linhasPecas)}${blocoTexto("Serviços", linhasServicos)}Total geral: ${fmtMoeda(total)}
+${obs ? `\nObservação: ${obs}` : ""}`;
+
+  previewCliente.classList.remove("hidden");
+  clienteStatus.textContent = "";
+  previewCliente.scrollIntoView({behavior:"smooth"});
+}
+
+function copiarOrcamentoCliente(){
+  if(!textoCliente.value.trim()){ prepararEnvioCliente(); }
+  copiarTexto(textoCliente.value, clienteStatus);
+}
+
+function enviarWhatsapp(){
+  if(!textoCliente.value.trim()){ prepararEnvioCliente(); }
+  if(!textoCliente.value.trim()) return;
+
+  const telefoneRaw = (document.getElementById("clienteWhatsapp")?.value || "").replace(/\D/g,"");
+  const texto = encodeURIComponent(textoCliente.value);
+
+  let url;
+  if(telefoneRaw){
+    const telefone = telefoneRaw.length <= 11 ? "55" + telefoneRaw : telefoneRaw; // assume DDD+numero se faltar o 55 do Brasil
+    url = `https://wa.me/${telefone}?text=${texto}`;
+  }else{
+    url = `https://wa.me/?text=${texto}`;
+  }
+
+  window.open(url, "_blank");
+  clienteStatus.style.color = "var(--good)";
+  clienteStatus.textContent = telefoneRaw
+    ? "Abrindo WhatsApp para enviar ao número informado..."
+    : "Abrindo WhatsApp — escolha o contato para enviar.";
+}
+
+function imprimirOrcamento(){
+  if(!textoCliente.value.trim()){ prepararEnvioCliente(); }
+  if(!printArea.innerHTML.trim()) return;
+  window.print();
+}
+
+function confirmarEnvioCliente(){
+  const cliente = document.getElementById("clienteNome").value.trim() || "Cliente";
+  clienteEnvios.push({ cliente, data: new Date().toISOString() });
+  lsSet("ac_cliente_envios", clienteEnvios);
+  clienteStatus.style.color = "var(--good)";
+  clienteStatus.textContent = `Orçamento marcado como enviado para ${cliente}.`;
+}
+
+/* =========================================================
+   HISTÓRICO / SALVAR ORÇAMENTO / NOVO ORÇAMENTO
+========================================================= */
+
+function formatarDataHora(data){
+  return new Date(data).toLocaleString("pt-BR", { dateStyle:"short", timeStyle:"short" });
+}
+
+function atualizarCabecalhoOrcamento(){
+  const numeroEl = document.getElementById("numeroOrcamentoAtualView");
+  const dataEl = document.getElementById("dataOrcamentoAtualView");
+  if(numeroEl) numeroEl.textContent = `#${numeroOrcamentoAtual}`;
+  if(dataEl) dataEl.textContent = new Date(dataOrcamentoAtual).toLocaleDateString("pt-BR");
+}
+
+function proximoNumeroOrcamento(){
+  const maior = historicoOrcamentos.reduce((max, o) => Math.max(max, Number(o.numero) || 0), 999);
+  return Math.max(1000, maior + 1);
+}
+
+function salvarOrcamento(){
+  if(!cotacao.length && !servicosFinais.length){
+    alert("Adicione pelo menos uma peça ou serviço antes de salvar o orçamento.");
+    return;
+  }
+
+  const cliente = document.getElementById("clienteNome")?.value.trim() || "Cliente";
+  const telefone = document.getElementById("clienteWhatsapp")?.value.trim() || "";
+  const obs = document.getElementById("clienteObs")?.value.trim() || "";
+  const snapshot = {
+    numero: numeroOrcamentoAtual,
+    data: dataOrcamentoAtual,
+    salvoEm: new Date().toISOString(),
+    cliente,
+    telefone,
+    observacao: obs,
+    veiculo: JSON.parse(JSON.stringify(dadosCarro())),
+    cotacao: JSON.parse(JSON.stringify(cotacao)),
+    servicosFinais: JSON.parse(JSON.stringify(servicosFinais)),
+    fornecedores: JSON.parse(JSON.stringify(selecionados)),
+    precos: JSON.parse(JSON.stringify(precos)),
+    cotacaoEnviada: !!cotacaoEnviada
+  };
+
+  if(editingHistoricoIndex !== null && historicoOrcamentos[editingHistoricoIndex]){
+    // Estamos editando um orçamento já salvo: atualiza o registro existente em vez de duplicá-lo.
+    historicoOrcamentos[editingHistoricoIndex] = snapshot;
+    lsSet("ac_historico_orcamentos", historicoOrcamentos);
+    alert(`Orçamento #${numeroOrcamentoAtual} atualizado no histórico com sucesso.`);
+    editingHistoricoIndex = null;
+  }else{
+    // Sempre cria um novo registro. O snapshot é independente do orçamento atual.
+    historicoOrcamentos.push(snapshot);
+    lsSet("ac_historico_orcamentos", historicoOrcamentos);
+    alert(`Orçamento #${numeroOrcamentoAtual} salvo no histórico com sucesso.`);
+  }
+
+  novoOrcamentoAutomatico();
+}
+
+function limparCamposNovoOrcamento(){
+  cotacao = [];
+  precos = {};
+  selecionados = [];
+  cotacaoEnviada = false;
+  servicosFinais = [];
+  selecaoPecas = new Set();
+
+  const ids = [
+    "carroMarca","carroModelo","carroAno","carroMotor","carroPlaca","carroKm",
+    "clienteNome","clienteWhatsapp","clienteObs","textoCotacao","textoCliente"
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = "";
+  });
+
+  ["pecaInput","novaPecaNome","novaPecaCategoria","novaPecaMarca","novaPecaPosicao",
+   "servicoFinalInput","valorServicoFinalInput"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = "";
+  });
+
+  const qtdPeca = document.getElementById("qtdInput");
+  const qtdServico = document.getElementById("qtdServicoFinalInput");
+  if(qtdPeca) qtdPeca.value = 1;
+  if(qtdServico) qtdServico.value = 1;
+
+  const localizacao = document.getElementById("localizacaoInput");
+  if(localizacao) localizacao.value = "";
+  const marcaInputEl = document.getElementById("marcaInput");
+  if(marcaInputEl) marcaInputEl.value = "";
+  atualizarMarcasDoPecaInput();
+
+  document.getElementById("finalCotacao")?.classList.add("hidden");
+  document.getElementById("previewCliente")?.classList.add("hidden");
+  document.getElementById("cardCadastroPeca")?.classList.add("hidden");
+  document.getElementById("printArea").innerHTML = "";
+
+  ["addStatus","copyStatus","enviarStatus","clienteStatus","servicoFinalStatus","cadastroPecaStatus"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = "";
+  });
+
+  try{ localStorage.removeItem("ac_dadosCarro"); }catch(e){}
+  lsSet("ac_cotacao", cotacao);
+  lsSet("ac_precos", precos);
+  lsSet("ac_selecionados", selecionados);
+  lsSet("ac_enviada", cotacaoEnviada);
+  lsSet("ac_servicos_finais", servicosFinais);
+}
+
+function novoOrcamentoAutomatico(){
+  limparCamposNovoOrcamento();
+  numeroOrcamentoAtual = proximoNumeroOrcamento();
+  dataOrcamentoAtual = new Date().toISOString();
+  lsSet("ac_numero_orcamento_atual", numeroOrcamentoAtual);
+  lsSet("ac_data_orcamento_atual", dataOrcamentoAtual);
+  atualizarCabecalhoOrcamento();
+
+  renderCotacao();
+  renderForn();
+  renderComparar();
+  renderServicosFinais();
+  renderHistorico();
+  stats();
+
+  showPage("cotacao", document.querySelectorAll(".nav button")[2]);
+  setTimeout(() => document.getElementById("pecaInput")?.focus(), 150);
+}
+
+function renderHistorico(){
+  const body = document.getElementById("historicoBody");
+  if(!body) return;
+  if(!historicoOrcamentos.length){
+    body.innerHTML = `<div class="empty">Nenhum orçamento salvo no histórico.</div>`;
+    return;
+  }
+
+  const lista = [...historicoOrcamentos].reverse();
+  body.innerHTML = `
+    <table>
+      <thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Veículo</th><th>Itens</th><th></th></tr></thead>
+      <tbody>
+        ${lista.map((o, reverseIndex) => {
+          const realIndex = historicoOrcamentos.length - 1 - reverseIndex;
+          const v = o.veiculo || {};
+          const veiculo = [v.marca, v.modelo, v.ano].filter(Boolean).join(" ") || "Não informado";
+          const itens = (o.cotacao?.length || 0) + (o.servicosFinais?.length || 0);
+          return `<tr>
+            <td><b>#${escapeHtml(o.numero)}</b></td>
+            <td>${escapeHtml(formatarDataHora(o.salvoEm || o.data))}</td>
+            <td>${escapeHtml(o.cliente || "Cliente")}</td>
+            <td>${escapeHtml(veiculo)}</td>
+            <td>${itens}</td>
+            <td>
+              <div class="historico-actions">
+                <button class="btn" onclick="visualizarHistorico(${realIndex})">Visualizar</button>
+                <button class="btn" onclick="editarHistorico(${realIndex})">Editar</button>
+                <button class="btn" onclick="duplicarHistorico(${realIndex})">Duplicar</button>
+                <button class="danger" onclick="excluirHistorico(${realIndex})">Excluir</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+}
+
+function excluirHistorico(i){
+  if(!historicoOrcamentos[i]) return;
+  if(!confirm(`Excluir o orçamento #${historicoOrcamentos[i].numero} do histórico?`)) return;
+  historicoOrcamentos.splice(i,1);
+  lsSet("ac_historico_orcamentos", historicoOrcamentos);
+  renderHistorico();
+}
+
+/* =========================================================
+   VISUALIZAR ORÇAMENTO SALVO (somente leitura)
+========================================================= */
+
+function visualizarHistorico(i){
+  const snap = historicoOrcamentos[i];
+  if(!snap) return;
+
+  const cot = snap.cotacao || [];
+  const serv = snap.servicosFinais || [];
+  const melhores = melhoresPrecosDe(cot, snap.fornecedores || [], snap.precos || {});
+
+  let totalPecas = 0;
+  const linhasPecas = cot.map((item, idx) => {
+    const m = melhores[idx];
+    let valorUnit = null, subtotal = null, fornecedorNome = null;
+    if(m){
+      valorUnit = calcularValorFinal(m.valor, item.acrescimo);
+      subtotal = valorUnit * item.qtd;
+      totalPecas += subtotal;
+      fornecedorNome = m.fornecedor;
+    }
+    return { item, valorUnit, subtotal, fornecedorNome };
+  });
+
+  let totalServicos = 0;
+  const linhasServicos = serv.map(s => {
+    const qtd = Number(s.qtd) || 1;
+    const subtotal = (Number(s.valor) || 0) * qtd;
+    totalServicos += subtotal;
+    return { nome:s.nome, qtd, valor:Number(s.valor)||0, subtotal };
+  });
+
+  const total = totalPecas + totalServicos;
+  const v = snap.veiculo || {};
+  const veiculoTxt = [v.marca, v.modelo, v.ano ? `(${v.ano})` : ""].filter(Boolean).join(" ") || "Não informado";
+
+  const tabelaPecasHtml = linhasPecas.length ? `
+    <h3 style="margin:16px 0 6px">Peças</h3>
+    <table>
+      <thead><tr><th>Item</th><th>Marca</th><th>Localização</th><th>Qtd.</th><th>Fornecedor</th><th>Valor unit.</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        ${linhasPecas.map(l => `<tr>
+          <td><b>${escapeHtml(l.item.nome)}</b></td>
+          <td>${escapeHtml(l.item.marca || "—")}</td>
+          <td>${escapeHtml(l.item.localizacao || "—")}</td>
+          <td>${l.item.qtd}</td>
+          <td>${l.fornecedorNome ? escapeHtml(l.fornecedorNome) : '<span class="muted">Sem preço registrado</span>'}</td>
+          <td>${l.valorUnit !== null ? fmtMoeda(l.valorUnit) : "—"}</td>
+          <td>${l.subtotal !== null ? fmtMoeda(l.subtotal) : "—"}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>` : '<p class="muted">Nenhuma peça neste orçamento.</p>';
+
+  const tabelaServicosHtml = linhasServicos.length ? `
+    <h3 style="margin:16px 0 6px">Serviços</h3>
+    <table>
+      <thead><tr><th>Serviço</th><th>Qtd.</th><th>Valor unit.</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        ${linhasServicos.map(s => `<tr>
+          <td><b>${escapeHtml(s.nome)}</b></td>
+          <td>${s.qtd}</td>
+          <td>${fmtMoeda(s.valor)}</td>
+          <td>${fmtMoeda(s.subtotal)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>` : '<p class="muted">Nenhum serviço neste orçamento.</p>';
+
+  const html = `
+    <div class="preview-head">
+      <div>
+        <div class="preview-title">Orçamento #${escapeHtml(snap.numero)}</div>
+        <div class="preview-sub">Salvo em ${escapeHtml(formatarDataHora(snap.salvoEm || snap.data))} — consulta somente leitura, este registro não é alterado ao visualizar.</div>
+      </div>
+      <button class="btn" onclick="fecharModalHistorico()">Fechar</button>
+    </div>
+    <p><b>Cliente:</b> ${escapeHtml(snap.cliente || "Cliente")}${snap.telefone ? ` — <b>WhatsApp:</b> ${escapeHtml(snap.telefone)}` : ""}</p>
+    <p><b>Veículo:</b> ${escapeHtml(veiculoTxt)}${v.motor ? ` — Motor ${escapeHtml(v.motor)}` : ""}${v.placa ? ` — Placa ${escapeHtml(v.placa)}` : ""}${v.km ? ` — ${escapeHtml(v.km)} km` : ""}</p>
+    ${tabelaPecasHtml}
+    ${tabelaServicosHtml}
+    <div class="preview-total">${fmtMoeda(total)} <small>total geral</small></div>
+    ${snap.observacao ? `<p class="muted" style="margin-top:10px"><b>Observação:</b> ${escapeHtml(snap.observacao)}</p>` : ""}
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
+      <button class="btn" onclick="fecharModalHistorico(); duplicarHistorico(${i})">Duplicar como novo orçamento</button>
+      <button class="primary" onclick="fecharModalHistorico(); editarHistorico(${i})">Editar este orçamento</button>
+    </div>
+  `;
+
+  document.getElementById("modalHistoricoBox").innerHTML = html;
+  document.getElementById("modalHistorico").classList.remove("hidden");
+}
+
+function fecharModalHistorico(){
+  document.getElementById("modalHistorico")?.classList.add("hidden");
+}
+
+/* =========================================================
+   EDITAR / DUPLICAR ORÇAMENTO SALVO
+========================================================= */
+
+function carregarSnapshotEmEdicao(snapshot, opcoes){
+  opcoes = opcoes || {};
+  const criandoCopia = opcoes.novoNumero !== undefined;
+
+  cotacao = JSON.parse(JSON.stringify(snapshot.cotacao || []));
+  servicosFinais = JSON.parse(JSON.stringify(snapshot.servicosFinais || []));
+  selecionados = JSON.parse(JSON.stringify(snapshot.fornecedores || []));
+  precos = JSON.parse(JSON.stringify(snapshot.precos || {}));
+  cotacaoEnviada = !!snapshot.cotacaoEnviada;
+  selecaoPecas = new Set();
+
+  // garante que fornecedores usados no orçamento salvo continuem visíveis na tela "Fornecedores"
+  selecionados.forEach(f => { if(!fornecedores.includes(f)) fornecedores.push(f); });
+
+  numeroOrcamentoAtual = criandoCopia ? opcoes.novoNumero : (snapshot.numero || numeroOrcamentoAtual);
+  dataOrcamentoAtual = criandoCopia ? new Date().toISOString() : (snapshot.data || new Date().toISOString());
+
+  const v = snapshot.veiculo || {};
+  const camposCarro = { carroMarca:v.marca, carroModelo:v.modelo, carroAno:v.ano, carroMotor:v.motor, carroPlaca:v.placa, carroKm:v.km };
+  Object.keys(camposCarro).forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = camposCarro[id] || "";
+  });
+  lsSet("ac_dadosCarro", v);
+
+  const clienteNomeEl = document.getElementById("clienteNome");
+  const clienteWhatsEl = document.getElementById("clienteWhatsapp");
+  const clienteObsEl = document.getElementById("clienteObs");
+  if(clienteNomeEl) clienteNomeEl.value = snapshot.cliente || "";
+  if(clienteWhatsEl) clienteWhatsEl.value = snapshot.telefone || "";
+  if(clienteObsEl) clienteObsEl.value = snapshot.observacao || "";
+
+  document.getElementById("finalCotacao")?.classList.add("hidden");
+  document.getElementById("previewCliente")?.classList.add("hidden");
+
+  lsSet("ac_numero_orcamento_atual", numeroOrcamentoAtual);
+  lsSet("ac_data_orcamento_atual", dataOrcamentoAtual);
+
+  save();
+  atualizarCabecalhoOrcamento();
+  atualizarBannerEdicao();
+}
+
+function editarHistorico(i){
+  const snap = historicoOrcamentos[i];
+  if(!snap) return;
+  if((cotacao.length || servicosFinais.length) &&
+     !confirm(`Isso vai substituir os itens da cotação atual em andamento (ainda não salva) pelos dados do orçamento #${snap.numero}. Deseja continuar?`)) return;
+
+  editingHistoricoIndex = i;
+  carregarSnapshotEmEdicao(snap);
+  showPage("cotacao", document.querySelectorAll(".nav button")[2]);
+}
+
+function duplicarHistorico(i){
+  const snap = historicoOrcamentos[i];
+  if(!snap) return;
+  if((cotacao.length || servicosFinais.length) &&
+     !confirm(`Isso vai substituir os itens da cotação atual em andamento (ainda não salva) por uma cópia do orçamento #${snap.numero}. Deseja continuar?`)) return;
+
+  editingHistoricoIndex = null;
+  const novoNumero = proximoNumeroOrcamento();
+  carregarSnapshotEmEdicao(snap, { novoNumero });
+  showPage("cotacao", document.querySelectorAll(".nav button")[2]);
+}
+
+function cancelarEdicaoHistorico(){
+  if(!confirm("Cancelar a edição? As alterações não salvas neste orçamento serão descartadas.")) return;
+  editingHistoricoIndex = null;
+  novoOrcamentoAutomatico();
+}
+
+function atualizarBannerEdicao(){
+  const banner = document.getElementById("edicaoHistoricoBanner");
+  if(!banner) return;
+  const span = banner.querySelector("span");
+  if(editingHistoricoIndex !== null && historicoOrcamentos[editingHistoricoIndex]){
+    banner.classList.remove("hidden");
+    if(span) span.textContent = `Editando orçamento #${historicoOrcamentos[editingHistoricoIndex].numero} do histórico. Ao clicar em "Salvar Orçamento", o registro original será atualizado (não será criado um novo).`;
+  }else{
+    banner.classList.add("hidden");
+  }
+}
+
+/* =========================================================
+   VERSÃO / MIGRAÇÃO (estrutura preparada para futuras atualizações)
+========================================================= */
+
+const APP_VERSAO = "2.0";
+
+/* =========================================================
+   TOASTS (mensagens de sucesso / erro / informação)
+========================================================= */
+
+function toast(mensagem, tipo, opcoes){
+  tipo = tipo || "info";
+  opcoes = opcoes || {};
+  const container = document.getElementById("toastContainer");
+  if(!container) return;
+
+  const el = document.createElement("div");
+  el.className = `toast ${tipo}`;
+  const icone = tipo === "sucesso" ? "✓" : tipo === "erro" ? "✕" : "ℹ";
+
+  const acaoHtml = opcoes.acaoLabel
+    ? `<button class="toast-undo" type="button">${escapeHtml(opcoes.acaoLabel)}</button>`
+    : `<button class="toast-close" type="button" aria-label="Fechar">✕</button>`;
+
+  el.innerHTML = `<span class="toast-ico">${icone}</span><span>${escapeHtml(mensagem)}</span>${acaoHtml}`;
+  container.appendChild(el);
+
+  const remover = () => { el.style.opacity = "0"; setTimeout(() => el.remove(), 180); };
+
+  if(opcoes.acaoLabel && typeof opcoes.onAcao === "function"){
+    el.querySelector(".toast-undo").onclick = () => { opcoes.onAcao(); remover(); };
+  }else{
+    const btnFechar = el.querySelector(".toast-close");
+    if(btnFechar) btnFechar.onclick = remover;
+  }
+
+  setTimeout(remover, opcoes.duracao || 4500);
+}
+
+/* =========================================================
+   MODAL DE CONFIRMAÇÃO (substitui confirm() nativo em ações destrutivas)
+========================================================= */
+
+let _confirmacaoCallback = null;
+
+function confirmarAcao(titulo, mensagem, onConfirmar, opcoesBtn){
+  document.getElementById("confirmacaoTitulo").textContent = titulo;
+  document.getElementById("confirmacaoMensagem").textContent = mensagem;
+  const btnOk = document.getElementById("confirmacaoBtnOk");
+  btnOk.textContent = (opcoesBtn && opcoesBtn.textoConfirmar) || "Confirmar";
+  _confirmacaoCallback = onConfirmar;
+  document.getElementById("modalConfirmacao").classList.remove("hidden");
+}
+
+function fecharConfirmacao(confirmou){
+  document.getElementById("modalConfirmacao").classList.add("hidden");
+  const cb = _confirmacaoCallback;
+  _confirmacaoCallback = null;
+  if(confirmou && typeof cb === "function") cb();
+}
+
+/* =========================================================
+   UTILITÁRIOS: debounce, validação, sidebar mobile
+========================================================= */
+
+function debounce(fn, espera){
+  let timer;
+  return function(...args){
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this,args), espera || 250);
+  };
+}
+
+function marcarCampoErro(elOuId, mensagem){
+  const el = typeof elOuId === "string" ? document.getElementById(elOuId) : elOuId;
+  if(!el) return;
+  el.classList.add("campo-erro");
+  el.addEventListener("input", function limpar(){ el.classList.remove("campo-erro"); el.removeEventListener("input", limpar); }, {once:true});
+  if(mensagem) toast(mensagem, "erro");
+}
+
+function toggleSidebarMobile(){
+  document.body.classList.toggle("sidebar-open");
+}
+function fecharSidebarMobile(){
+  document.body.classList.remove("sidebar-open");
+}
+document.addEventListener("click", (e) => {
+  if(document.body.classList.contains("sidebar-open") &&
+     !e.target.closest(".sidebar") && !e.target.closest(".hamburger")){
+    fecharSidebarMobile();
+  }
+});
+
+/* Atalho de teclado Ctrl+K / Cmd+K para focar a pesquisa global */
+document.addEventListener("keydown", (e) => {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k"){
+    e.preventDefault();
+    document.getElementById("buscaGlobal")?.focus();
+  }
+});
+
+/* =========================================================
+   PESQUISA RÁPIDA GLOBAL (peças, fornecedores, histórico)
+========================================================= */
+
+function fecharResultadosBusca(){
+  const box = document.getElementById("topbarSearchResults");
+  if(box){ box.classList.remove("show"); box.innerHTML = ""; }
+}
+
+document.addEventListener("click", (e) => {
+  if(!e.target.closest(".topbar-search")) fecharResultadosBusca();
+});
+
+function pesquisaGlobal(termoBruto){
+  const termo = (termoBruto || "").trim().toLowerCase();
+  const box = document.getElementById("topbarSearchResults");
+  if(!box) return;
+
+  if(!termo){ fecharResultadosBusca(); return; }
+
+  const resultadosPecas = pecas.filter(p =>
+    p.nome.toLowerCase().includes(termo) ||
+    p.categoria.toLowerCase().includes(termo) ||
+    (p.marcas||[]).some(m => m.toLowerCase().includes(termo))
+  ).slice(0,5);
+
+  const resultadosForn = fornecedores.filter(f => f.toLowerCase().includes(termo)).slice(0,5);
+
+  const resultadosHist = historicoOrcamentos.filter(o =>
+    String(o.numero).includes(termo) ||
+    (o.cliente||"").toLowerCase().includes(termo)
+  ).slice(0,5);
+
+  const partes = [];
+
+  if(resultadosPecas.length){
+    partes.push(`<div class="tsr-group-label">Peças</div>`);
+    resultadosPecas.forEach(p => {
+      const idx = pecas.indexOf(p);
+      partes.push(`<button type="button" class="tsr-item" onclick="irParaPecaBusca(${idx})">${escapeHtml(p.nome)}<small>${escapeHtml(p.categoria)}${(p.marcas&&p.marcas.length)?" — "+escapeHtml(p.marcas.slice(0,3).join(", ")):""}</small></button>`);
+    });
+  }
+
+  if(resultadosForn.length){
+    partes.push(`<div class="tsr-group-label">Fornecedores</div>`);
+    resultadosForn.forEach(f => {
+      partes.push(`<button type="button" class="tsr-item" onclick="irParaFornecedorBusca('${escapeHtml(f).replace(/'/g,"\\'")}')">${escapeHtml(f)}<small>Fornecedor cadastrado</small></button>`);
+    });
+  }
+
+  if(resultadosHist.length){
+    partes.push(`<div class="tsr-group-label">Histórico de orçamentos</div>`);
+    resultadosHist.forEach(o => {
+      const realIndex = historicoOrcamentos.indexOf(o);
+      partes.push(`<button type="button" class="tsr-item" onclick="irParaHistoricoBusca(${realIndex})">Orçamento #${escapeHtml(o.numero)}<small>${escapeHtml(o.cliente||"Cliente")} — ${escapeHtml(formatarDataHora(o.salvoEm||o.data))}</small></button>`);
+    });
+  }
+
+  if(!partes.length){
+    box.innerHTML = `<div class="tsr-empty">Nenhum resultado para "${escapeHtml(termoBruto)}".</div>`;
+  }else{
+    box.innerHTML = partes.join("");
+  }
+  box.classList.add("show");
+}
+
+const pesquisaGlobalDebounced = debounce(pesquisaGlobal, 200);
+
+function irParaPecaBusca(idx){
+  fecharResultadosBusca();
+  document.getElementById("buscaGlobal").value = "";
+  showPage("pecas", document.querySelectorAll(".nav button")[1]);
+  const p = pecas[idx];
+  if(p){
+    document.getElementById("busca").value = p.nome;
+    renderPecas();
+  }
+}
+
+function irParaFornecedorBusca(nome){
+  fecharResultadosBusca();
+  document.getElementById("buscaGlobal").value = "";
+  showPage("fornecedores", document.querySelectorAll(".nav button")[2]);
+  setTimeout(() => {
+    const linhas = [...document.querySelectorAll("#fornBody tr")];
+    const alvo = linhas.find(tr => tr.textContent.includes(nome));
+    if(alvo){ alvo.style.outline = "2px solid var(--accent)"; alvo.scrollIntoView({behavior:"smooth",block:"center"}); setTimeout(()=>alvo.style.outline="",1600); }
+  }, 80);
+}
+
+function irParaHistoricoBusca(realIndex){
+  fecharResultadosBusca();
+  document.getElementById("buscaGlobal").value = "";
+  showPage("historico", document.querySelectorAll(".nav button")[5]);
+  setTimeout(() => visualizarHistorico(realIndex), 80);
+}
+
+/* =========================================================
+   INDICADOR DE SALVAMENTO AUTOMÁTICO
+========================================================= */
+
+function atualizarIndicadorSalvamento(){
+  const el = document.getElementById("autoSaveIndicator");
+  if(!el) return;
+  el.textContent = `Salvo automaticamente às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}`;
+}
+
+/* Evita perda de dados ao fechar/atualizar a página durante uma edição em andamento */
+window.addEventListener("beforeunload", (e) => {
+  if(editingHistoricoIndex !== null){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+/* =========================================================
+   DUPLICAR ITENS (cotação e serviços finais)
+========================================================= */
+
+function duplicarItemCotacao(i){
+  const item = cotacao[i];
+  if(!item) return;
+  cotacao.splice(i + 1, 0, JSON.parse(JSON.stringify(item)));
+  resetarEnvio();
+  save();
+  toast(`"${item.nome}" duplicado.`, "sucesso");
+}
+
+function duplicarServicoFinal(i){
+  const item = servicosFinais[i];
+  if(!item) return;
+  servicosFinais.splice(i + 1, 0, JSON.parse(JSON.stringify(item)));
+  save();
+  toast(`Serviço "${item.nome}" duplicado.`, "sucesso");
+}
+
+/* =========================================================
+   BACKUP E RESTAURAÇÃO
+========================================================= */
+
+function coletarDadosParaBackup(){
+  return {
+    app: "AutoCotação Brasil",
+    versao: APP_VERSAO,
+    exportadoEm: new Date().toISOString(),
+    dados: {
+      ac_fornecedores: fornecedores,
+      ac_cotacao: cotacao,
+      ac_selecionados: selecionados,
+      ac_precos: precos,
+      ac_enviada: cotacaoEnviada,
+      ac_cliente_envios: clienteEnvios,
+      ac_servicos_finais: servicosFinais,
+      ac_historico_orcamentos: historicoOrcamentos,
+      ac_numero_orcamento_atual: numeroOrcamentoAtual,
+      ac_data_orcamento_atual: dataOrcamentoAtual,
+      ac_pecas_custom_v2: pecasCustom,
+      ac_dadosCarro: ls("ac_dadosCarro", {})
+    }
+  };
+}
+
+function exportarBackup(){
+  const dados = coletarDadosParaBackup();
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const dataArquivo = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `autocotacao-backup-${dataArquivo}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("Backup exportado com sucesso.", "sucesso");
+}
+
+function importarBackup(){
+  const input = document.getElementById("arquivoBackup");
+  const status = document.getElementById("backupStatus");
+  const arquivo = input.files && input.files[0];
+
+  if(!arquivo){
+    status.style.color = "var(--bad)";
+    status.textContent = "Selecione um arquivo de backup (.json) antes de restaurar.";
+    return;
+  }
+
+  const leitor = new FileReader();
+  leitor.onload = (e) => {
+    let json;
+    try{
+      json = JSON.parse(e.target.result);
+    }catch(err){
+      status.style.color = "var(--bad)";
+      status.textContent = "Arquivo inválido: não é um backup .json reconhecível.";
+      return;
+    }
+
+    const dados = json.dados || json; // aceita tanto o formato novo quanto um objeto simples de chaves
+
+    confirmarAcao(
+      "Restaurar backup",
+      "Isso vai substituir todos os dados atuais salvos neste navegador pelos dados do arquivo selecionado. Deseja continuar?",
+      () => {
+        Object.keys(dados).forEach(chave => lsSet(chave, dados[chave]));
+        status.style.color = "var(--good)";
+        status.textContent = "Backup restaurado com sucesso. Recarregando o sistema...";
+        toast("Backup restaurado. Recarregando...", "sucesso");
+        setTimeout(() => location.reload(), 1200);
+      },
+      { textoConfirmar: "Restaurar" }
+    );
+  };
+  leitor.onerror = () => {
+    status.style.color = "var(--bad)";
+    status.textContent = "Não foi possível ler o arquivo selecionado.";
+  };
+  leitor.readAsText(arquivo);
+}
+
+function confirmarLimpezaTotal(){
+  confirmarAcao(
+    "Apagar todos os dados",
+    "Esta ação apaga permanentemente todos os dados salvos neste navegador (peças cadastradas manualmente, fornecedores, cotação atual e todo o histórico de orçamentos). Não pode ser desfeita. Recomendamos exportar um backup antes de continuar.",
+    () => {
+      try{
+        [
+          "ac_fornecedores","ac_cotacao","ac_selecionados","ac_precos","ac_enviada",
+          "ac_cliente_envios","ac_servicos_finais","ac_historico_orcamentos",
+          "ac_numero_orcamento_atual","ac_data_orcamento_atual","ac_pecas_custom_v2","ac_dadosCarro"
+        ].forEach(chave => localStorage.removeItem(chave));
+        toast("Todos os dados foram apagados. Recarregando...", "sucesso");
+        setTimeout(() => location.reload(), 1000);
+      }catch(err){
+        toast("Não foi possível apagar os dados neste navegador.", "erro");
+      }
+    },
+    { textoConfirmar: "Apagar tudo" }
+  );
+}
+
+function renderBackupResumo(){
+  const wrap = document.getElementById("backupResumo");
+  if(!wrap) return;
+  const itens = [
+    { label:"Peças no catálogo", valor: pecas.length },
+    { label:"Fornecedores cadastrados", valor: fornecedores.length },
+    { label:"Orçamentos no histórico", valor: historicoOrcamentos.length },
+    { label:"Itens na cotação atual", valor: cotacao.length },
+    { label:"Serviços no orçamento atual", valor: servicosFinais.length },
+    { label:"Envios registrados ao cliente", valor: clienteEnvios.length }
+  ];
+  wrap.innerHTML = itens.map(i => `
+    <div class="card stat" style="margin-bottom:0">
+      <label>${escapeHtml(i.label)}</label>
+      <strong>${i.valor}</strong>
+    </div>`).join("");
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+init();
+
+</script>
+</body>
+</html>
