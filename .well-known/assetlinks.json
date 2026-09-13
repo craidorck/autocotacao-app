@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.craidorck.twa",
+        "sha256_cert_fingerprints": ["68:90:FB:FB:2D:96:F0:D8:C0:58:29:18:31:25:31:03:7D:D1:66:3D:09:60:13:14:B2:F1:43:83:DA:2D:BF:DE"]
+      }
+    }]
