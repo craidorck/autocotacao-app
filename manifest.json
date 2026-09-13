@@ -12,8 +12,8 @@
       "type": "image/png",
       "sizes": "512x512"
     }
-  ],
-  "start_url": "/index.html",
+  ]
+  "start_url": "/autocotacao-app/index.html",
   "background_color": "#0a0d12",
   "theme_color": "#ef8b2c",
   "display": "standalone",
